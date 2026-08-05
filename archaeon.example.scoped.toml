@@ -1,6 +1,6 @@
 # motor-ctrl — COARSE SCOPED config (config-only scoping).
 #
-# Companion to archeon.example.toml, showing the narrowed-scope variant.
+# Companion to archaeon.example.toml, showing the narrowed-scope variant.
 #
 # Rationale: the default whole-component scope tends to sweep in vendored
 # thirdparty/ and generated binding code, which dominates the symbol graph and

@@ -1,7 +1,7 @@
 import numpy as np
 import requests
 
-from archeon.codegraph.symsource import symbol_rows
+from archaeon.codegraph.symsource import symbol_rows
 
 CODE_PROMPT = "Represent this C/C++ code for retrieval:\n"
 

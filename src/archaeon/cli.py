@@ -5,18 +5,18 @@ from pathlib import Path
 
 import click
 
-from archeon import config as config_mod
-from archeon.analysis.coupling import compute_coupling, strongest_pairs
-from archeon.analysis.link_eval import evaluate, load_gold
-from archeon.analysis.link_heuristics import (
+from archaeon import config as config_mod
+from archaeon.analysis.coupling import compute_coupling, strongest_pairs
+from archaeon.analysis.link_eval import evaluate, load_gold
+from archaeon.analysis.link_heuristics import (
     discover_ticket_keys, extract_heuristic_links)
-from archeon.analysis.link_llm import recover_links
-from archeon.codegraph.scan import scan_component
-from archeon.connectors.git_connector import ingest_git
-from archeon.connectors.jira_connector import ingest_jira_by_keys
-from archeon.connectors.pr_connector import ingest_prs
-from archeon.connectors.wiki_connector import ingest_wiki_export
-from archeon.db import connect
+from archaeon.analysis.link_llm import recover_links
+from archaeon.codegraph.scan import scan_component
+from archaeon.connectors.git_connector import ingest_git
+from archaeon.connectors.jira_connector import ingest_jira_by_keys
+from archaeon.connectors.pr_connector import ingest_prs
+from archaeon.connectors.wiki_connector import ingest_wiki_export
+from archaeon.db import connect
 
 
 def _load(config_path: str):
@@ -26,12 +26,12 @@ def _load(config_path: str):
 
 
 config_option = click.option("--config", "config_path",
-                             default="archeon.toml", show_default=True)
+                             default="archaeon.toml", show_default=True)
 
 
 @click.group()
 def main():
-    """Archeon evidence lake."""
+    """Archaeon evidence lake."""
 
 
 @main.command("ingest-git")
@@ -56,8 +56,8 @@ def cli_ingest_jira(config_path):
     cfg, conn = _load(config_path)
     keys = discover_ticket_keys(conn, cfg["jira"]["project_keys"])
     n = ingest_jira_by_keys(conn, cfg["jira"]["base_url"], keys,
-                            os.environ["ARCHEON_JIRA_TOKEN"],
-                            email=os.environ.get("ARCHEON_JIRA_EMAIL"))
+                            os.environ["ARCHAEON_JIRA_TOKEN"],
+                            email=os.environ.get("ARCHAEON_JIRA_EMAIL"))
     click.echo(f"tickets: {n} (from {len(keys)} discovered keys)")
 
 
@@ -95,7 +95,7 @@ def cli_link(config_path):
 @main.command("link-llm")
 @config_option
 def cli_link_llm(config_path):
-    from archeon.llm import AgentClassifier
+    from archaeon.llm import AgentClassifier
     cfg, conn = _load(config_path)
     classifier = AgentClassifier(cfg["llm"]["cheap_model"], max_turns=3)
     n = recover_links(conn, classifier.ask,
@@ -129,7 +129,7 @@ def cli_scan(config_path):
 @config_option
 def cli_embed(config_path):
     """Build the local embedding index for scanned symbols (idempotent)."""
-    from archeon.retrieval.embed import build_embedding_index
+    from archaeon.retrieval.embed import build_embedding_index
     cfg, conn = _load(config_path)
     retr = config_mod.retrieval(cfg)
     r = build_embedding_index(conn, Path(cfg["component"]["repo_path"]),
@@ -150,11 +150,11 @@ def cli_embed(config_path):
 @config_option
 def cli_cluster(config_path):
     """Cluster scanned symbols into feature areas (embeds first if possible)."""
-    from archeon.cost import CostMeter
-    from archeon.llm import AgentClassifier
-    from archeon.retrieval.cluster import (
+    from archaeon.cost import CostMeter
+    from archaeon.llm import AgentClassifier
+    from archaeon.retrieval.cluster import (
         LABEL_SYSTEM, cluster_symbols, label_cluster)
-    from archeon.retrieval.embed import build_embedding_index
+    from archaeon.retrieval.embed import build_embedding_index
     cfg, conn = _load(config_path)
     retr = config_mod.retrieval(cfg)
     e = build_embedding_index(conn, Path(cfg["component"]["repo_path"]),
@@ -210,13 +210,13 @@ def cli_synthesize(config_path, feature, cluster_id, all_clusters, out_dir):
     under that path prefix (ranked by the prefix symbols' own centroid),
     never expanding to whole clusters that merely overlap the prefix.
     """
-    from archeon.claims.recover import (
+    from archaeon.claims.recover import (
         SYNTH_SYSTEM, VERIFY_SYSTEM, synthesize_claims, verify_claims)
-    from archeon.claims.pin import pin_claims
-    from archeon.claims.schema import save_claims
-    from archeon.cost import CostMeter
-    from archeon.llm import AgentClassifier
-    from archeon.retrieval.bundle import bundle_for_cluster, bundle_for_prefix
+    from archaeon.claims.pin import pin_claims
+    from archaeon.claims.schema import save_claims
+    from archaeon.cost import CostMeter
+    from archaeon.llm import AgentClassifier
+    from archaeon.retrieval.bundle import bundle_for_cluster, bundle_for_prefix
 
     if sum(bool(x) for x in (feature, cluster_id is not None,
                              all_clusters)) != 1:
@@ -303,14 +303,14 @@ def cli_why(config_path, claims_dir, feature):
     synthesizes, mechanically grounds, and adversarially verifies the
     rationale. Run `synthesize` and the ingest commands first.
     """
-    from archeon.claims.pin import pin_claims
-    from archeon.claims.schema import load_claims, save_claims
-    from archeon.claims.why import (
+    from archaeon.claims.pin import pin_claims
+    from archaeon.claims.schema import load_claims, save_claims
+    from archaeon.claims.why import (
         WHY_SYNTH_SYSTEM, WHY_VERIFY_SYSTEM, ground_citations,
         synthesize_why_claims, verify_why_claims)
-    from archeon.claims.why_corpus import build_corpus, collect_artifacts
-    from archeon.cost import CostMeter
-    from archeon.llm import AgentClassifier
+    from archaeon.claims.why_corpus import build_corpus, collect_artifacts
+    from archaeon.cost import CostMeter
+    from archaeon.llm import AgentClassifier
 
     cfg, conn = _load(config_path)
     why_cfg = config_mod.why(cfg)
@@ -501,14 +501,14 @@ def cli_why(config_path, claims_dir, feature):
 @click.option("--claims", "claims_dir", default="claims", show_default=True,
               help="directory of claim YAML files to review")
 @click.option("--config", "config_path", default=None,
-              help="optional archeon.toml; enables cluster + fan-in metadata")
+              help="optional archaeon.toml; enables cluster + fan-in metadata")
 @click.option("--host", default="127.0.0.1", show_default=True)
 @click.option("--port", default=8000, show_default=True, type=int)
 def cli_review(claims_dir, config_path, host, port):
     """Local review UI: browse + accept/edit/reject claims back into YAML."""
     import uvicorn
 
-    from archeon.review.server import create_app
+    from archaeon.review.server import create_app
     db = None
     if config_path:
         cfg = config_mod.load(Path(config_path))
@@ -523,8 +523,8 @@ def cli_review(claims_dir, config_path, host, port):
 @click.option("--labels", "labels_path", required=True,
               help="CSV: claim_id,correct (yes/no) from expert review")
 def cli_claims_eval(claims_dir, labels_path):
-    from archeon.claims.claim_eval import evaluate_claims, load_labels
-    from archeon.claims.schema import load_claims
+    from archaeon.claims.claim_eval import evaluate_claims, load_labels
+    from archaeon.claims.schema import load_claims
     claims = load_claims(Path(claims_dir))
     result = evaluate_claims(claims, load_labels(Path(labels_path)))
     if not result:
@@ -566,8 +566,8 @@ def cli_claims_eval(claims_dir, labels_path):
 def cli_check_staleness(config_path, claims_dir):
     """Report claims whose commit-pinned evidence has drifted (stale) or was
     never anchorable (unpinnable) — input to re-verification."""
-    from archeon.claims.pin import is_stale
-    from archeon.claims.schema import load_claims
+    from archaeon.claims.pin import is_stale
+    from archaeon.claims.schema import load_claims
     cfg = config_mod.load(Path(config_path))
     repo = Path(cfg["component"]["repo_path"])
     claims = load_claims(Path(claims_dir))

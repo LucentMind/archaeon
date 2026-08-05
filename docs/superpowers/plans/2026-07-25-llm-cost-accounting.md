@@ -4,7 +4,7 @@
 
 **Goal:** Capture the real per-call cost the Claude Agent SDK already returns on its terminal `ResultMessage`, aggregate it per command run, print a summary, and write `run_cost.json` beside the synthesized claims.
 
-**Architecture:** A dependency-free `CostMeter` accumulator in a new `src/archeon/cost.py` (no SDK import — it duck-types the fields off whatever message object it is handed, so it unit-tests in isolation). `AgentClassifier` gains two optional constructor params (`meter`, `stage`) and records into the meter for every terminal message `_ask` sees — success and the SDK's error subtypes alike — while still reading `.result` only on success; `meter=None` is the default and is byte-for-byte today's behavior, so `link-llm` and every other caller is untouched. The two LLM-driven commands (`synthesize`, `cluster`) each build one meter, share it across every classifier they construct, and report at the end.
+**Architecture:** A dependency-free `CostMeter` accumulator in a new `src/archaeon/cost.py` (no SDK import — it duck-types the fields off whatever message object it is handed, so it unit-tests in isolation). `AgentClassifier` gains two optional constructor params (`meter`, `stage`) and records into the meter for every terminal message `_ask` sees — success and the SDK's error subtypes alike — while still reading `.result` only on success; `meter=None` is the default and is byte-for-byte today's behavior, so `link-llm` and every other caller is untouched. The two LLM-driven commands (`synthesize`, `cluster`) each build one meter, share it across every classifier they construct, and report at the end.
 
 **Tech Stack:** Python ≥3.13, stdlib only (`dataclasses`, `datetime`, `json`), `click` for output, `pytest` for tests, `uv` as the runner.
 
@@ -13,9 +13,9 @@
 ## Global Constraints
 
 - **No new dependencies.** Everything here is stdlib + what's already in `pyproject.toml`.
-- **`src/archeon/cost.py` must not import `claude_agent_sdk`.** It reads duck-typed attributes only. This is what lets `tests/test_cost.py` run without the SDK installed (unlike `tests/test_llm.py`, which starts with `pytest.importorskip("claude_agent_sdk")`).
+- **`src/archaeon/cost.py` must not import `claude_agent_sdk`.** It reads duck-typed attributes only. This is what lets `tests/test_cost.py` run without the SDK installed (unlike `tests/test_llm.py`, which starts with `pytest.importorskip("claude_agent_sdk")`).
 - **No new DB table, no price table, no pre-run estimate.** Post-run actual accounting only.
-- **Honesty labelling is mandatory on every surface.** This project authenticates through the Claude CLI's subscription/OAuth login — `_cli_auth_env` (`src/archeon/llm.py:20-26`) deliberately strips `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN`. The SDK's `total_cost_usd` is therefore normally the **API-equivalent** cost, not an amount actually charged.
+- **Honesty labelling is mandatory on every surface.** This project authenticates through the Claude CLI's subscription/OAuth login — `_cli_auth_env` (`src/archaeon/llm.py:20-26`) deliberately strips `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN`. The SDK's `total_cost_usd` is therefore normally the **API-equivalent** cost, not an amount actually charged.
   - Default (subscription) route — nothing in `ROUTE_VARS` set:
     - Printed summary first line must contain the exact substrings `API-equivalent` and `not billed`.
     - JSON must carry `"billed": false` and this exact `note` string:
@@ -26,7 +26,7 @@
 - **Stable JSON keys** (tests pin these): `command`, `generated_at`, `total_usd`, `calls`, `failed_calls`, `billed`, `note`, `by_stage`, `by_model`. Per-bucket keys: `usd`, `calls`, `input_tokens`, `output_tokens`, `cache_read_tokens`.
 - **Terminal error results are costed.** `ResultMessage` subtypes `error_max_turns` / `error_during_execution` still carry `total_cost_usd`, `usage` and `num_turns`, so they are recorded like a success and counted in `failed_calls` (`format_summary` warns when that is non-zero, and is silent when it is zero). The `.result` read stays gated to `success`, so no errored terminal can yield text through that branch. That is *not* the same as saying `ask` returns `""` for a genuine SDK error: in production the real SDK raises after an `is_error` result — the CLI process exits non-zero and `query()` turns that into an exception (see `claude_agent_sdk/_internal/query.py`) — so `ask` propagates that exception instead of returning `""`. The recorded cost survives the raise because `record` runs first; callers such as `verify_claims` catch the exception and degrade the claim to `contested`. The subtype classification lives only in `cost.py` (`is_terminal_result` / `is_success_result` / `is_error_result`) and is never re-derived in `llm.py`.
 - **`tests/conftest.py` clears `ROUTE_VARS` for every test** (autouse fixture), so the developer's own shell cannot flip the default-branch billing assertions. Tests wanting the unknown branch set the var themselves.
-- **No test may make a real LLM call.** Any path reaching `AgentClassifier.ask` must monkeypatch `archeon.llm.query` before `runner.invoke`.
+- **No test may make a real LLM call.** Any path reaching `AgentClassifier.ask` must monkeypatch `archaeon.llm.query` before `runner.invoke`.
 - **`total_usd` is rounded to 4 decimal places** in `summary_dict`; the printed total uses `:.4f`.
 - **Stage names** (string literals, pinned by tests): `"synthesize"`, `"verify"`, `"cluster-label"`.
 - **Test command:** `uv run pytest`. Run from the repo root.
@@ -38,24 +38,24 @@
 
 | File | Status | Responsibility |
 |---|---|---|
-| `src/archeon/cost.py` | **create** | `CallCost` dataclass, `_usage_get`, `call_cost_from_message`, `CostMeter`. Pure aggregation + formatting. No SDK, no click, no I/O. |
+| `src/archaeon/cost.py` | **create** | `CallCost` dataclass, `_usage_get`, `call_cost_from_message`, `CostMeter`. Pure aggregation + formatting. No SDK, no click, no I/O. |
 | `tests/test_cost.py` | **create** | Unit tests for the above against hand-rolled fake messages. No SDK import. |
-| `src/archeon/llm.py` | modify (`:40-44`, `:49-62`) | `AgentClassifier` accepts `meter`/`stage`; records one `CallCost` per terminal message (success or error subtype), reading `.result` only on success. |
+| `src/archaeon/llm.py` | modify (`:40-44`, `:49-62`) | `AgentClassifier` accepts `meter`/`stage`; records one `CallCost` per terminal message (success or error subtype), reading `.result` only on success. |
 | `tests/test_llm.py` | modify (append) | Backward-compat (no meter) + recording (with meter) + no-success (meter untouched). |
-| `src/archeon/cli.py` | modify (`:1-17`, `:147-174`, `:190-270`) | Build one meter per run, thread it into every `AgentClassifier`, echo the summary, write `run_cost.json` (synthesize only, `encoding="utf-8"`). |
+| `src/archaeon/cli.py` | modify (`:1-17`, `:147-174`, `:190-270`) | Build one meter per run, thread it into every `AgentClassifier`, echo the summary, write `run_cost.json` (synthesize only, `encoding="utf-8"`). |
 | `tests/test_cli.py` | modify (append) | `synthesize` writes a parseable `run_cost.json`; `cluster` prints the summary (asserted inside `runner.isolated_filesystem()`). |
 | `tests/conftest.py` | **create** | Autouse fixture clearing `cost.ROUTE_VARS`, so billing assertions do not depend on the developer's shell. |
 
 `cluster` has no claims output directory, so it is **print-only** — no JSON file. That asymmetry is intentional. `CliRunner` does not sandbox the filesystem, so that asymmetry must be asserted from an isolated cwd — a `not (tmp_path / "run_cost.json").exists()` assertion would pass no matter what the command does.
 
-> **Note on the code blocks in Tasks 1-3 below:** they are the pre-review draft. The shipped contract differs in the ways listed under Global Constraints (`failed_calls`, the `billed` tri-state, terminal-error recording, ASCII output, `command` in the printed line, `encoding="utf-8"`, and `format_summary`'s optional `summary=` parameter). Read `src/archeon/cost.py` and the [spec](../specs/2026-07-25-llm-cost-accounting-design.md), which were updated to match, as the source of truth.
+> **Note on the code blocks in Tasks 1-3 below:** they are the pre-review draft. The shipped contract differs in the ways listed under Global Constraints (`failed_calls`, the `billed` tri-state, terminal-error recording, ASCII output, `command` in the printed line, `encoding="utf-8"`, and `format_summary`'s optional `summary=` parameter). Read `src/archaeon/cost.py` and the [spec](../specs/2026-07-25-llm-cost-accounting-design.md), which were updated to match, as the source of truth.
 
 ---
 
 ### Task 1: `cost.py` — the meter
 
 **Files:**
-- Create: `src/archeon/cost.py`
+- Create: `src/archaeon/cost.py`
 - Test: `tests/test_cost.py`
 
 **Interfaces:**
@@ -76,7 +76,7 @@ import json
 
 import pytest
 
-from archeon.cost import CallCost, CostMeter, call_cost_from_message
+from archaeon.cost import CallCost, CostMeter, call_cost_from_message
 
 
 class _Msg:
@@ -206,11 +206,11 @@ def test_empty_meter_is_a_valid_zero_record():
 uv run pytest tests/test_cost.py -v
 ```
 
-Expected: collection error — `ModuleNotFoundError: No module named 'archeon.cost'`.
+Expected: collection error — `ModuleNotFoundError: No module named 'archaeon.cost'`.
 
 - [ ] **Step 3: Write the implementation**
 
-Create `src/archeon/cost.py`:
+Create `src/archaeon/cost.py`:
 
 ```python
 """Post-run LLM cost accounting.
@@ -221,7 +221,7 @@ duck-typed attributes off whatever object it is handed, so it is testable
 without the SDK installed and cannot drift with SDK imports.
 
 The dollar figures are **API-equivalent** — this project authenticates via
-the Claude CLI's subscription login (see ``archeon.llm._cli_auth_env``), so
+the Claude CLI's subscription login (see ``archaeon.llm._cli_auth_env``), so
 nothing here was actually billed to an API key.
 """
 
@@ -351,7 +351,7 @@ Expected: all pass (this task adds a leaf module nothing imports yet).
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/archeon/cost.py tests/test_cost.py && git commit -m "$(cat <<'EOF'
+git add src/archaeon/cost.py tests/test_cost.py && git commit -m "$(cat <<'EOF'
 feat(cost): CostMeter for post-run LLM cost accounting
 
 SDK-free accumulator over the Claude Agent SDK's per-call total_cost_usd
@@ -368,11 +368,11 @@ EOF
 ### Task 2: Thread the meter through `AgentClassifier`
 
 **Files:**
-- Modify: `src/archeon/llm.py:40-44` (constructor), `src/archeon/llm.py:49-62` (`_ask`)
+- Modify: `src/archaeon/llm.py:40-44` (constructor), `src/archaeon/llm.py:49-62` (`_ask`)
 - Test: `tests/test_llm.py` (append)
 
 **Interfaces:**
-- Consumes: `archeon.cost.CostMeter` from Task 1 — specifically `meter.record(msg, stage, model)`.
+- Consumes: `archaeon.cost.CostMeter` from Task 1 — specifically `meter.record(msg, stage, model)`.
 - Produces, relied on by Task 3:
   `AgentClassifier(model: str, system_prompt: str = SYSTEM_PROMPT, max_turns: int = 1, meter=None, stage: str = "")`.
   `ask(prompt) -> str` is unchanged. With `meter=None` (the default) nothing is recorded and behavior is identical to today.
@@ -407,7 +407,7 @@ def test_ask_without_a_meter_is_unchanged(monkeypatch):
 
 
 def test_ask_records_one_call_into_the_meter(monkeypatch):
-    from archeon.cost import CostMeter
+    from archaeon.cost import CostMeter
 
     monkeypatch.setattr(llm, "query",
                         _fake_query_factory([_FakeCostedResult("YES")]))
@@ -427,7 +427,7 @@ def test_ask_records_one_call_into_the_meter(monkeypatch):
 
 
 def test_meter_untouched_when_no_success_message(monkeypatch):
-    from archeon.cost import CostMeter
+    from archaeon.cost import CostMeter
 
     monkeypatch.setattr(llm, "query", _fake_query_factory([_FakeNonResult()]))
     meter = CostMeter()
@@ -446,7 +446,7 @@ Expected: `test_ask_without_a_meter_is_unchanged` fails with `AttributeError: 'A
 
 - [ ] **Step 3: Write the implementation**
 
-In `src/archeon/llm.py`, replace the constructor (currently lines 40-44):
+In `src/archaeon/llm.py`, replace the constructor (currently lines 40-44):
 
 ```python
     def __init__(self, model: str, system_prompt: str = SYSTEM_PROMPT,
@@ -454,7 +454,7 @@ In `src/archeon/llm.py`, replace the constructor (currently lines 40-44):
         self._model = model
         self._system_prompt = system_prompt
         self._max_turns = max_turns
-        # Optional archeon.cost.CostMeter. None (the default) means no
+        # Optional archaeon.cost.CostMeter. None (the default) means no
         # recording and byte-for-byte the pre-cost-accounting behavior.
         self._meter = meter
         self._stage = stage
@@ -509,7 +509,7 @@ Expected: all pass. `tests/test_link_llm.py` exercises the other `AgentClassifie
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/archeon/llm.py tests/test_llm.py && git commit -m "$(cat <<'EOF'
+git add src/archaeon/llm.py tests/test_llm.py && git commit -m "$(cat <<'EOF'
 feat(llm): optional cost meter on AgentClassifier
 
 Record the SDK's terminal ResultMessage into an injected CostMeter at the
@@ -526,7 +526,7 @@ EOF
 ### Task 3: Wire `synthesize` and `cluster`
 
 **Files:**
-- Modify: `src/archeon/cli.py:1-17` (add `import json`), `src/archeon/cli.py:147-174` (`cli_cluster`), `src/archeon/cli.py:190-270` (`cli_synthesize`)
+- Modify: `src/archaeon/cli.py:1-17` (add `import json`), `src/archaeon/cli.py:147-174` (`cli_cluster`), `src/archaeon/cli.py:190-270` (`cli_synthesize`)
 - Test: `tests/test_cli.py` (append; also add `import json` at the top)
 
 **Interfaces:**
@@ -535,10 +535,10 @@ EOF
 
 **Background for the implementer:**
 
-- `cli_synthesize` constructs **two** `AgentClassifier` instances per target inside the `for label, cid in targets:` loop (`src/archeon/cli.py:249-253`). Both must receive the *same* meter — build it once before the loop — with stages `"synthesize"` and `"verify"` respectively.
-- Write `run_cost.json` **after** `save_claims(...)` (`src/archeon/cli.py:267`). The ordering is the safety property: claims are already durable on disk before the cost file is attempted, so a failure writing it can never cost you a run's claims. No `try`/`except` is needed — `save_claims` creates `out_dir`, so if the directory were unwritable `save_claims` would already have failed.
-- `cli_cluster` builds one `labeller` (`src/archeon/cli.py:164-165`) that `cluster_symbols` invokes once per cluster via `label_fn`. Stage is `"cluster-label"`. `cluster` has no output directory, so it prints the summary and writes no file.
-- **Zero-call runs are valid records.** If a run reaches the end having made no LLM calls (e.g. the CLI tests stub out `synthesize_claims`/`verify_claims`), the summary still prints and the JSON still writes with `total_usd: 0.0, calls: 0`. Note this is distinct from the `--feature`-with-no-bundle path at `src/archeon/cli.py:246-248`, which raises `ClickException` and aborts before either claims or cost are written — that stays as it is.
+- `cli_synthesize` constructs **two** `AgentClassifier` instances per target inside the `for label, cid in targets:` loop (`src/archaeon/cli.py:249-253`). Both must receive the *same* meter — build it once before the loop — with stages `"synthesize"` and `"verify"` respectively.
+- Write `run_cost.json` **after** `save_claims(...)` (`src/archaeon/cli.py:267`). The ordering is the safety property: claims are already durable on disk before the cost file is attempted, so a failure writing it can never cost you a run's claims. No `try`/`except` is needed — `save_claims` creates `out_dir`, so if the directory were unwritable `save_claims` would already have failed.
+- `cli_cluster` builds one `labeller` (`src/archaeon/cli.py:164-165`) that `cluster_symbols` invokes once per cluster via `label_fn`. Stage is `"cluster-label"`. `cluster` has no output directory, so it prints the summary and writes no file.
+- **Zero-call runs are valid records.** If a run reaches the end having made no LLM calls (e.g. the CLI tests stub out `synthesize_claims`/`verify_claims`), the summary still prints and the JSON still writes with `total_usd: 0.0, calls: 0`. Note this is distinct from the `--feature`-with-no-bundle path at `src/archaeon/cli.py:246-248`, which raises `ClickException` and aborts before either claims or cost are written — that stays as it is.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -558,8 +558,8 @@ def test_synthesize_writes_run_cost_json(tmp_path, monkeypatch):
     runner = CliRunner()
     assert runner.invoke(main, ["scan", "--config", str(config)]).exit_code == 0
 
-    import archeon.claims.recover as recover_mod
-    from archeon.claims.schema import Claim
+    import archaeon.claims.recover as recover_mod
+    from archaeon.claims.schema import Claim
 
     def fake_synth(feature, bundle, ask):
         return [Claim(id="CLM-0001", type="threshold", statement="s",
@@ -597,11 +597,11 @@ def test_cluster_prints_cost_summary(tmp_path, monkeypatch):
 
     import requests as _rq
 
-    import archeon.retrieval.embed as embed_mod
+    import archaeon.retrieval.embed as embed_mod
     monkeypatch.setattr(embed_mod, "embed_texts",
                         lambda *a, **k: (_ for _ in ()).throw(
                             _rq.RequestException("refused")))
-    import archeon.retrieval.cluster as cluster_mod
+    import archaeon.retrieval.cluster as cluster_mod
     monkeypatch.setattr(cluster_mod, "label_cluster",
                         lambda rows, ask: ("", ""))
 
@@ -623,7 +623,7 @@ Expected: `test_synthesize_writes_run_cost_json` fails on `assert "API-equivalen
 
 - [ ] **Step 3: Add the `json` import to `cli.py`**
 
-`src/archeon/cli.py` currently starts:
+`src/archaeon/cli.py` currently starts:
 
 ```python
 import os
@@ -640,19 +640,19 @@ from pathlib import Path
 
 - [ ] **Step 4: Wire `cli_synthesize`**
 
-In `src/archeon/cli.py`, add `CostMeter` to the lazy import block at the top of `cli_synthesize` (currently `src/archeon/cli.py:207-212`):
+In `src/archaeon/cli.py`, add `CostMeter` to the lazy import block at the top of `cli_synthesize` (currently `src/archaeon/cli.py:207-212`):
 
 ```python
-    from archeon.claims.recover import (
+    from archaeon.claims.recover import (
         SYNTH_SYSTEM, VERIFY_SYSTEM, synthesize_claims, verify_claims)
-    from archeon.claims.pin import pin_claims
-    from archeon.claims.schema import save_claims
-    from archeon.cost import CostMeter
-    from archeon.llm import AgentClassifier
-    from archeon.retrieval.bundle import bundle_for_cluster, bundle_for_prefix
+    from archaeon.claims.pin import pin_claims
+    from archaeon.claims.schema import save_claims
+    from archaeon.cost import CostMeter
+    from archaeon.llm import AgentClassifier
+    from archaeon.retrieval.bundle import bundle_for_cluster, bundle_for_prefix
 ```
 
-Replace the model/loop setup (currently `src/archeon/cli.py:239-241`) so one meter is created before the loop:
+Replace the model/loop setup (currently `src/archaeon/cli.py:239-241`) so one meter is created before the loop:
 
 ```python
     model = cfg["llm"].get("expensive_model", cfg["llm"]["cheap_model"])
@@ -662,7 +662,7 @@ Replace the model/loop setup (currently `src/archeon/cli.py:239-241`) so one met
     for label, cid in targets:
 ```
 
-Replace the two classifier constructions inside the loop (currently `src/archeon/cli.py:249-253`):
+Replace the two classifier constructions inside the loop (currently `src/archaeon/cli.py:249-253`):
 
 ```python
         claims = synthesize_claims(
@@ -674,7 +674,7 @@ Replace the two classifier constructions inside the loop (currently `src/archeon
                                       meter=meter, stage="verify").ask)
 ```
 
-Finally, replace the closing echo (currently `src/archeon/cli.py:267-270`) with the claims summary plus the cost report. The cost file is written *after* `save_claims`, so claims are already durable if the write fails:
+Finally, replace the closing echo (currently `src/archaeon/cli.py:267-270`) with the claims summary plus the cost report. The cost file is written *after* `save_claims`, so claims are already durable if the write fails:
 
 ```python
     save_claims(all_claims, Path(out_dir))
@@ -688,17 +688,17 @@ Finally, replace the closing echo (currently `src/archeon/cli.py:267-270`) with 
 
 - [ ] **Step 5: Wire `cli_cluster`**
 
-In `src/archeon/cli.py`, extend the lazy import block in `cli_cluster` (currently `src/archeon/cli.py:151-154`):
+In `src/archaeon/cli.py`, extend the lazy import block in `cli_cluster` (currently `src/archaeon/cli.py:151-154`):
 
 ```python
-    from archeon.cost import CostMeter
-    from archeon.llm import AgentClassifier
-    from archeon.retrieval.cluster import (
+    from archaeon.cost import CostMeter
+    from archaeon.llm import AgentClassifier
+    from archaeon.retrieval.cluster import (
         LABEL_SYSTEM, cluster_symbols, label_cluster)
-    from archeon.retrieval.embed import build_embedding_index
+    from archaeon.retrieval.embed import build_embedding_index
 ```
 
-Replace the `labeller` construction (currently `src/archeon/cli.py:164-165`):
+Replace the `labeller` construction (currently `src/archaeon/cli.py:164-165`):
 
 ```python
     meter = CostMeter()
@@ -707,7 +707,7 @@ Replace the `labeller` construction (currently `src/archeon/cli.py:164-165`):
                                stage="cluster-label")
 ```
 
-And append the cost line after the per-cluster listing (currently ends at `src/archeon/cli.py:174`). `cluster` has no output directory, so this is print-only:
+And append the cost line after the per-cluster listing (currently ends at `src/archaeon/cli.py:174`). `cluster` has no output directory, so this is print-only:
 
 ```python
     for c in clusters:
@@ -735,7 +735,7 @@ Expected: all pass. Watch `test_synthesize_feature_without_clusters_uses_fallbac
 - [ ] **Step 8: Commit**
 
 ```bash
-git add src/archeon/cli.py tests/test_cli.py && git commit -m "$(cat <<'EOF'
+git add src/archaeon/cli.py tests/test_cli.py && git commit -m "$(cat <<'EOF'
 feat(cli): report actual LLM cost for synthesize and cluster
 
 One CostMeter per run threaded into every AgentClassifier. synthesize
@@ -755,7 +755,7 @@ EOF
 The unit and CLI tests never touch the network, so the real SDK fields are only exercised by a live run. Against a scanned component:
 
 ```bash
-uv run archeon synthesize --config archeon.example.scoped.toml --feature src/ --out /tmp/cost-check
+uv run archaeon synthesize --config archaeon.example.scoped.toml --feature src/ --out /tmp/cost-check
 ```
 
 Confirm, in `/tmp/cost-check/run_cost.json` and the printed block:

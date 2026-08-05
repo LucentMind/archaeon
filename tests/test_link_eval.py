@@ -1,5 +1,5 @@
-from archeon.analysis.link_eval import evaluate, load_gold
-from archeon.db import connect
+from archaeon.analysis.link_eval import evaluate, load_gold
+from archaeon.db import connect
 
 GOLD_CSV = """sha,ticket_key
 c1,EMB-1

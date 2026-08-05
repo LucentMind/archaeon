@@ -1,4 +1,4 @@
-from archeon.claims.schema import (
+from archaeon.claims.schema import (
     CODE_INFERRED_MAX_CONFIDENCE, CLAIM_TYPES, WHY_CLAIM_TYPES, Claim, Evidence, load_claims, save_claims)
 
 

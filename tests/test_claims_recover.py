@@ -1,6 +1,6 @@
 import json
 
-from archeon.claims.recover import (
+from archaeon.claims.recover import (
     build_feature_bundle, synthesize_claims, verify_claims)
 
 

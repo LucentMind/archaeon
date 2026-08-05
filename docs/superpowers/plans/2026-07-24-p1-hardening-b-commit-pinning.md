@@ -21,10 +21,10 @@ Copied verbatim from the spec — every task's requirements implicitly include t
 
 ## File Structure
 
-- `src/archeon/claims/schema.py` — **modify**: add optional anchor fields to `Evidence`. Owns the persisted claim/evidence shape.
-- `src/archeon/connectors/git_connector.py` — **modify**: add read helpers (`head_sha`, `blob_sha`, `show_file`, `is_dirty`). Owns all git subprocess access.
-- `src/archeon/claims/pin.py` — **create**: ref parsing, normalization, hashing, `pin_evidence`, `pin_claims`, `is_stale`, `stale_claims`. Owns anchoring + staleness logic.
-- `src/archeon/cli.py` — **modify**: wire `pin_claims` into `synthesize`; add `check-staleness` command.
+- `src/archaeon/claims/schema.py` — **modify**: add optional anchor fields to `Evidence`. Owns the persisted claim/evidence shape.
+- `src/archaeon/connectors/git_connector.py` — **modify**: add read helpers (`head_sha`, `blob_sha`, `show_file`, `is_dirty`). Owns all git subprocess access.
+- `src/archaeon/claims/pin.py` — **create**: ref parsing, normalization, hashing, `pin_evidence`, `pin_claims`, `is_stale`, `stale_claims`. Owns anchoring + staleness logic.
+- `src/archaeon/cli.py` — **modify**: wire `pin_claims` into `synthesize`; add `check-staleness` command.
 - `tests/test_claims_schema.py` — **modify**: backward-compat + anchor-roundtrip.
 - `tests/test_git_connector.py` — **modify**: new git read helpers.
 - `tests/test_claims_pin.py` — **create**: ref/normalize/hash + pin + staleness.
@@ -35,7 +35,7 @@ Copied verbatim from the spec — every task's requirements implicitly include t
 ### Task 1: Evidence anchor fields (schema)
 
 **Files:**
-- Modify: `src/archeon/claims/schema.py:13-19`
+- Modify: `src/archaeon/claims/schema.py:13-19`
 - Test: `tests/test_claims_schema.py`
 
 **Interfaces:**
@@ -87,7 +87,7 @@ Expected: FAIL — `TypeError: Evidence.__init__() got an unexpected keyword arg
 
 - [ ] **Step 3: Add the fields**
 
-Replace the `Evidence` dataclass in `src/archeon/claims/schema.py`:
+Replace the `Evidence` dataclass in `src/archaeon/claims/schema.py`:
 
 ```python
 @dataclass
@@ -113,7 +113,7 @@ Expected: PASS (including the pre-existing `test_claim_roundtrip_yaml`).
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/archeon/claims/schema.py tests/test_claims_schema.py
+git add src/archaeon/claims/schema.py tests/test_claims_schema.py
 git commit -m "feat(claims): add optional commit-pin anchor fields to Evidence"
 ```
 
@@ -122,7 +122,7 @@ git commit -m "feat(claims): add optional commit-pin anchor fields to Evidence"
 ### Task 2: Git read helpers
 
 **Files:**
-- Modify: `src/archeon/connectors/git_connector.py`
+- Modify: `src/archaeon/connectors/git_connector.py`
 - Test: `tests/test_git_connector.py`
 
 **Interfaces:**
@@ -138,7 +138,7 @@ git commit -m "feat(claims): add optional commit-pin anchor fields to Evidence"
 Append to `tests/test_git_connector.py` (reuses the existing `_make_repo`, which commits `src/a.c` as `"int a;\n"` then `"int a;\nint b;\n"`):
 
 ```python
-from archeon.connectors.git_connector import (  # noqa: E402
+from archaeon.connectors.git_connector import (  # noqa: E402
     blob_sha, head_sha, is_dirty, show_file)
 
 
@@ -174,7 +174,7 @@ Expected: FAIL — `ImportError: cannot import name 'head_sha'`.
 
 - [ ] **Step 3: Add the helpers**
 
-Append to `src/archeon/connectors/git_connector.py`:
+Append to `src/archaeon/connectors/git_connector.py`:
 
 ```python
 def _run(repo_path: Path, *args: str) -> subprocess.CompletedProcess:
@@ -213,7 +213,7 @@ Expected: PASS (all, including pre-existing ingest tests).
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/archeon/connectors/git_connector.py tests/test_git_connector.py
+git add src/archaeon/connectors/git_connector.py tests/test_git_connector.py
 git commit -m "feat(git): add head_sha/blob_sha/show_file/is_dirty read helpers"
 ```
 
@@ -222,7 +222,7 @@ git commit -m "feat(git): add head_sha/blob_sha/show_file/is_dirty read helpers"
 ### Task 3: Pin primitives — ref parsing, normalization, hashing
 
 **Files:**
-- Create: `src/archeon/claims/pin.py`
+- Create: `src/archaeon/claims/pin.py`
 - Test: `tests/test_claims_pin.py`
 
 **Interfaces:**
@@ -237,7 +237,7 @@ git commit -m "feat(git): add head_sha/blob_sha/show_file/is_dirty read helpers"
 Create `tests/test_claims_pin.py`:
 
 ```python
-from archeon.claims.pin import content_hash, normalize, parse_ref
+from archaeon.claims.pin import content_hash, normalize, parse_ref
 
 
 def test_parse_ref_single_line():
@@ -275,18 +275,18 @@ def test_content_hash_changes_on_semantic_edit():
 - [ ] **Step 2: Run tests to verify they fail**
 
 Run: `uv run pytest tests/test_claims_pin.py -v`
-Expected: FAIL — `ModuleNotFoundError: No module named 'archeon.claims.pin'`.
+Expected: FAIL — `ModuleNotFoundError: No module named 'archaeon.claims.pin'`.
 
 - [ ] **Step 3: Create `pin.py` with the primitives**
 
-Create `src/archeon/claims/pin.py`:
+Create `src/archaeon/claims/pin.py`:
 
 ```python
 import hashlib
 import re
 from pathlib import Path
 
-from archeon.connectors.git_connector import (
+from archaeon.connectors.git_connector import (
     blob_sha, head_sha, is_dirty, show_file)
 
 _REF_RE = re.compile(r"^(?P<path>.+):(?P<start>\d+)(?:-(?P<end>\d+))?$")
@@ -332,7 +332,7 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/archeon/claims/pin.py tests/test_claims_pin.py
+git add src/archaeon/claims/pin.py tests/test_claims_pin.py
 git commit -m "feat(claims): pin primitives — ref parsing, normalization, hashing"
 ```
 
@@ -341,7 +341,7 @@ git commit -m "feat(claims): pin primitives — ref parsing, normalization, hash
 ### Task 4: Anchor capture — `pin_evidence` / `pin_claims`
 
 **Files:**
-- Modify: `src/archeon/claims/pin.py`
+- Modify: `src/archaeon/claims/pin.py`
 - Test: `tests/test_claims_pin.py`
 
 **Interfaces:**
@@ -357,8 +357,8 @@ Append to `tests/test_claims_pin.py`:
 ```python
 import subprocess
 
-from archeon.claims.pin import pin_claims, pin_evidence
-from archeon.claims.schema import Claim, Evidence
+from archaeon.claims.pin import pin_claims, pin_evidence
+from archaeon.claims.schema import Claim, Evidence
 
 
 def _git(repo, *a):
@@ -437,7 +437,7 @@ Expected: FAIL — `ImportError: cannot import name 'pin_evidence'`.
 
 - [ ] **Step 3: Add `pin_evidence` and `pin_claims`**
 
-Append to `src/archeon/claims/pin.py`:
+Append to `src/archaeon/claims/pin.py`:
 
 ```python
 def pin_evidence(evidence, repo_path) -> None:
@@ -484,7 +484,7 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/archeon/claims/pin.py tests/test_claims_pin.py
+git add src/archaeon/claims/pin.py tests/test_claims_pin.py
 git commit -m "feat(claims): capture commit-pinned anchors (pin_evidence/pin_claims)"
 ```
 
@@ -493,7 +493,7 @@ git commit -m "feat(claims): capture commit-pinned anchors (pin_evidence/pin_cla
 ### Task 5: Staleness check — `is_stale` / `stale_claims`
 
 **Files:**
-- Modify: `src/archeon/claims/pin.py`
+- Modify: `src/archaeon/claims/pin.py`
 - Test: `tests/test_claims_pin.py`
 
 **Interfaces:**
@@ -509,7 +509,7 @@ git commit -m "feat(claims): capture commit-pinned anchors (pin_evidence/pin_cla
 Append to `tests/test_claims_pin.py` (reuses `_repo`, `_git` from Task 4):
 
 ```python
-from archeon.claims.pin import is_stale, stale_claims
+from archaeon.claims.pin import is_stale, stale_claims
 
 
 def test_not_stale_when_lines_inserted_above(tmp_path):
@@ -583,7 +583,7 @@ Expected: FAIL — `ImportError: cannot import name 'is_stale'`.
 
 - [ ] **Step 3: Add `is_stale` and `stale_claims`**
 
-Append to `src/archeon/claims/pin.py`:
+Append to `src/archaeon/claims/pin.py`:
 
 ```python
 def is_stale(evidence, repo_path) -> bool:
@@ -634,7 +634,7 @@ Expected: PASS (all of Tasks 3–5).
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/archeon/claims/pin.py tests/test_claims_pin.py
+git add src/archaeon/claims/pin.py tests/test_claims_pin.py
 git commit -m "feat(claims): staleness check via content-hash relocation (is_stale/stale_claims)"
 ```
 
@@ -643,7 +643,7 @@ git commit -m "feat(claims): staleness check via content-hash relocation (is_sta
 ### Task 6: CLI wiring — pin on synthesize + `check-staleness`
 
 **Files:**
-- Modify: `src/archeon/cli.py:148-175` (synthesize), and add a new command
+- Modify: `src/archaeon/cli.py:148-175` (synthesize), and add a new command
 - Test: `tests/test_cli.py`
 
 **Interfaces:**
@@ -657,8 +657,8 @@ git commit -m "feat(claims): staleness check via content-hash relocation (is_sta
 Append to `tests/test_cli.py`:
 
 ```python
-from archeon.claims.pin import pin_claims  # noqa: E402
-from archeon.claims.schema import Claim, Evidence, save_claims  # noqa: E402
+from archaeon.claims.pin import pin_claims  # noqa: E402
+from archaeon.claims.schema import Claim, Evidence, save_claims  # noqa: E402
 
 
 def _setup_repo_with_multiline_file(tmp_path):
@@ -671,7 +671,7 @@ def _setup_repo_with_multiline_file(tmp_path):
         "int f(void) {\n  return 42;\n}\n")
     _git(repo, "add", ".")
     _git(repo, "commit", "-m", "init")
-    config = tmp_path / "archeon.toml"
+    config = tmp_path / "archaeon.toml"
     config.write_text(f"""
 [component]
 name = "demo"
@@ -740,14 +740,14 @@ Expected: FAIL — `check-staleness` is not a registered command (`r.exit_code !
 
 - [ ] **Step 3: Wire `pin_claims` into synthesize**
 
-In `src/archeon/cli.py`, in `cli_synthesize`, extend the local import and add the pin call. Change the import block:
+In `src/archaeon/cli.py`, in `cli_synthesize`, extend the local import and add the pin call. Change the import block:
 
 ```python
-    from archeon.claims.recover import (
+    from archaeon.claims.recover import (
         SYNTH_SYSTEM, VERIFY_SYSTEM, build_feature_bundle, synthesize_claims,
         verify_claims)
-    from archeon.claims.pin import pin_claims
-    from archeon.claims.schema import save_claims
+    from archaeon.claims.pin import pin_claims
+    from archaeon.claims.schema import save_claims
 ```
 
 Then, between `verify_claims(...)` and `save_claims(...)`, insert:
@@ -762,7 +762,7 @@ Then, between `verify_claims(...)` and `save_claims(...)`, insert:
 
 - [ ] **Step 4: Add the `check-staleness` command**
 
-Add to `src/archeon/cli.py` (e.g. after `cli_claims_eval`):
+Add to `src/archaeon/cli.py` (e.g. after `cli_claims_eval`):
 
 ```python
 @main.command("check-staleness")
@@ -771,8 +771,8 @@ Add to `src/archeon/cli.py` (e.g. after `cli_claims_eval`):
 def cli_check_staleness(config_path, claims_dir):
     """Report claims whose commit-pinned evidence has drifted (stale) or was
     never anchorable (unpinnable) — input to re-verification."""
-    from archeon.claims.pin import is_stale
-    from archeon.claims.schema import load_claims
+    from archaeon.claims.pin import is_stale
+    from archaeon.claims.schema import load_claims
     cfg = config_mod.load(Path(config_path))
     repo = Path(cfg["component"]["repo_path"])
     claims = load_claims(Path(claims_dir))
@@ -799,7 +799,7 @@ Expected: PASS (all tests, including the two new CLI tests and every pre-existin
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/archeon/cli.py tests/test_cli.py
+git add src/archaeon/cli.py tests/test_cli.py
 git commit -m "feat(cli): pin evidence on synthesize; add check-staleness command"
 ```
 

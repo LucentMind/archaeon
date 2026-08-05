@@ -2,9 +2,9 @@ import numpy as np
 import pytest
 import requests
 
-from archeon import retrieval
-from archeon.retrieval import embed as embed_mod
-from archeon.db import connect
+from archaeon import retrieval
+from archaeon.retrieval import embed as embed_mod
+from archaeon.db import connect
 
 
 def _insert(conn, name, path, line, end_line):

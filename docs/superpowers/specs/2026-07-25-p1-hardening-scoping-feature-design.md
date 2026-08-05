@@ -81,7 +81,7 @@ Verified semantics on representative paths:
 ### Where it applies
 
 Inside `scan_component`'s walk loop in
-[`src/archeon/codegraph/scan.py`](../../../src/archeon/codegraph/scan.py),
+[`src/archaeon/codegraph/scan.py`](../../../src/archaeon/codegraph/scan.py),
 **after** the `SOURCE_SUFFIXES` filter and **before** `_insert_symbols`. The
 per-`path_prefix` `DELETE` scope is unchanged, so re-scanning a prefix stays
 idempotent: a previously-unfiltered scan's now-excluded symbols get deleted and
@@ -105,7 +105,7 @@ those modules.
 ### Config payoff
 
 Update
-[`archeon.example.scoped.toml`](../../../archeon.example.scoped.toml)
+[`archaeon.example.scoped.toml`](../../../archaeon.example.scoped.toml)
 to add `exclude = ["**/generated/**/*.cpp"]` (and optionally
 `**/thirdparty/**`, `**/tests/**` as defense-in-depth). This eliminates the
 ~267 mechanical `toCpp`/`toJava` converter `.cpp` files that the directory-only
@@ -118,7 +118,7 @@ it cleanly.
 ### Current behavior (to remove)
 
 In `cli_synthesize`
-([`src/archeon/cli.py:242-250`](../../../src/archeon/cli.py)), `--feature`
+([`src/archaeon/cli.py:242-250`](../../../src/archaeon/cli.py)), `--feature`
 resolves to the set of clusters overlapping the prefix and bundles each **whole**
 via `bundle_for_cluster`; only when *no* cluster overlaps does it fall back to
 packing the prefix's own symbols.
@@ -128,7 +128,7 @@ packing the prefix's own symbols.
 `--feature <prefix>` becomes a **single** prefix-labeled target that bundles
 **exactly the symbols under the prefix** and can never expand past it. New
 helper in
-[`src/archeon/retrieval/bundle.py`](../../../src/archeon/retrieval/bundle.py),
+[`src/archaeon/retrieval/bundle.py`](../../../src/archaeon/retrieval/bundle.py),
 mirroring `bundle_for_cluster` but prefix-scoped:
 
 ```python
@@ -156,7 +156,7 @@ vectors are present.
 
 Manual, documented — run after A+B land and all tests pass.
 
-1. Under `archeon.example.scoped.toml` (now with the `exclude`
+1. Under `archaeon.example.scoped.toml` (now with the `exclude`
    glob) using the **4b** default embedding model
    (`qwen3-embedding:4b`), run:
    `scan → embed → cluster → synthesize --feature <navigator prefix> →

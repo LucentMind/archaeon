@@ -1,4 +1,4 @@
-from archeon.review import render
+from archaeon.review import render
 
 
 def _card(type_, symbols, statement="does a thing"):

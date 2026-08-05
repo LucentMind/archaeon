@@ -2,8 +2,8 @@ import json
 
 import pytest
 
-from archeon.codegraph.scan import scan_component
-from archeon.db import connect
+from archaeon.codegraph.scan import scan_component
+from archaeon.db import connect
 
 GOOD = "int f(void) { return 1; }\n"
 

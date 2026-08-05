@@ -1,5 +1,5 @@
-from archeon.codegraph.scan import scan_component, _keep
-from archeon.db import connect
+from archaeon.codegraph.scan import scan_component, _keep
+from archaeon.db import connect
 
 FN = "int {name}_fn(void) {{ return 1; }}\n"
 

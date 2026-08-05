@@ -1,7 +1,7 @@
 # P2 — Forward Pipeline: PR-driven living requirements and ADRs
 
 **Status:** design, approved for planning · **Date:** 2026-08-05
-**Track:** P2, the first forward-looking pipeline. Archeology (P0 evidence lake + P1 recovery)
+**Track:** P2, the first forward-looking pipeline. Archaeology (P0 evidence lake + P1 recovery)
 becomes the cold-set half of a two-pipeline coverage story; see §9.
 **Depends on:** P0 connectors (`pr_connector`, `git_connector`, `jira_connector`), P1-A retrieval
 (`retrieval/embed.py`, `retrieval/cluster.py`), P1-B commit pinning (`claims/pin.py`),
@@ -9,7 +9,7 @@ P1 recovery (`claims/recover.py`, `claims/why.py`), review store (`review/store.
 **Consumed by:** the MCP surface (design §8) and the review UI (Spec C), both unchanged by this
 spec beyond reading the new schema fields.
 
-Related: [design spec](2026-07-23-archeon-design.md) ·
+Related: [design spec](2026-07-23-archaeon-design.md) ·
 [Spec A retrieval + clustering](2026-07-24-p1-hardening-a-retrieval-clustering-design.md) ·
 [Spec B commit pinning](2026-07-24-p1-hardening-b-commit-pinning-design.md) ·
 [Spec D why-layer](2026-07-25-p1-hardening-d-why-layer-design.md) ·
@@ -19,11 +19,11 @@ why-layer validation runbook *(internal validation run — not in this repo)*
 
 ## 1. Problem
 
-Archeology recovers claims from the weakest evidence the project will ever have: drifted
+Archaeology recovers claims from the weakest evidence the project will ever have: drifted
 Confluence, ancient commits, tickets whose authors have left. It pays a large one-time cost for a
 snapshot that begins decaying the moment it is produced.
 
-Meanwhile every merged PR carries exactly the evidence archeology is straining to reconstruct — a
+Meanwhile every merged PR carries exactly the evidence archaeology is straining to reconstruct — a
 diff, a ticket, a description, a review discussion, and a named human — delivered as a small,
 dated delta. Precision per unit of LLM spend is far better forward than backward.
 
@@ -46,13 +46,13 @@ premise survives.
 - Detect ADR-worthy decisions from PR discussion, at high precision, never auto-landed.
 - Render requirements docs and MADR ADRs from the claim store, with no hand editing.
 - Keep exception-based adjudication: routine updates land, exceptions queue for a human.
-- Reuse the archeology extraction path rather than building a second, divergent one.
+- Reuse the archaeology extraction path rather than building a second, divergent one.
 
 **Non-goals (v1)**
 - Cross-repo or cross-component impact analysis.
 - Auto-fixing or auto-amending a PR's code.
 - PR hosts beyond what the `gh` CLI covers.
-- Retiring archeology — it remains the only coverage path for unchanged code (§9).
+- Retiring archaeology — it remains the only coverage path for unchanged code (§9).
 - Recall optimization on the guardrail. Precision first; recall is measured but not gated in v1.
 
 ## 3. Decisions taken
@@ -73,7 +73,7 @@ architectural decision.
 
 ## 4. Architecture
 
-New package `src/archeon/forward/`, plus a new `src/archeon/render/`.
+New package `src/archaeon/forward/`, plus a new `src/archaeon/render/`.
 
 | Unit | Job | Reuses |
 |---|---|---|
@@ -90,9 +90,9 @@ New package `src/archeon/forward/`, plus a new `src/archeon/render/`.
 Two CLI entry points over one shared front half:
 
 ```
-PR opened/updated  →  archeon guard  --pr N  →  event → candidates → guard      →  PR comment
-PR merged          →  archeon absorb --pr N  →  event → candidates → delta+adr  →  claim writes + exception queue
-                      archeon render --out docs/                                →  requirements.md + adr/*.md
+PR opened/updated  →  archaeon guard  --pr N  →  event → candidates → guard      →  PR comment
+PR merged          →  archaeon absorb --pr N  →  event → candidates → delta+adr  →  claim writes + exception queue
+                      archaeon render --out docs/                                →  requirements.md + adr/*.md
 ```
 
 ### 4.1 Invariants
@@ -103,7 +103,7 @@ PR merged          →  archeon absorb --pr N  →  event → candidates → del
 3. **`absorb` pins against the merge commit** via `claims/pin.py`, so every span it writes anchors
    to a real mainline commit. `guard` pins against the PR head for display only and discards it.
 4. **The forward pipeline can never write `status: expert_accepted`.** Only a human sets that.
-5. **Archeology never overwrites a witnessed claim** (§9.3).
+5. **Archaeology never overwrites a witnessed claim** (§9.3).
 
 ### 4.2 Candidate retrieval (`candidates.py`)
 
@@ -237,7 +237,7 @@ symbol-anchored candidates only and states the reduced coverage.
 **The comment.** Per finding: claim id and statement, the ticket/PR it traces to, the specific
 hunk, and one line of reasoning. Plus one affordance:
 
-> Reply `@archeon accept: <reason>` if this change is intentional.
+> Reply `@archaeon accept: <reason>` if this change is intentional.
 
 That reply is the highest-value evidence in the system. An author explaining why they deliberately
 broke a requirement is precisely the rationale that cannot be recovered from code or reconstructed
@@ -255,20 +255,20 @@ reconciles:
 absorb --pr N:
   1. candidates(PR)                        → existing claims in the blast radius
   2. synthesize(scope = changed symbols)   → proposed claims from post-merge code   [recover.py]
-  3. why(proposed, artifacts = this PR + ticket + discussion + @archeon replies)    [why.py]
+  3. why(proposed, artifacts = this PR + ticket + discussion + @archaeon replies)    [why.py]
   4. reconcile(proposed × candidates)      → {unchanged | amend | supersede | retire | add}   ← new
   5. adr_detect(PR discussion)             → decision-claim candidates                        ← new
   6. apply(deltas)                         → auto-land or queue
 ```
 
-Steps 2–3 being literally the archeology path is load-bearing: it guarantees a forward-written
+Steps 2–3 being literally the archaeology path is load-bearing: it guarantees a forward-written
 claim and a recovered claim mean the same thing, and prevents the two pipelines from drifting into
 two dialects of "claim".
 
 **Reconcile** is the only genuinely new model job, and it is pairwise and small. Given proposed
 claim P and existing claim E over the same anchor: same meaning → `unchanged` or `amend`; different
 meaning → `supersede`; E's anchor no longer exists → `retire`. Proposed claims matching nothing
-become `add`, after an embedding + symbol dedupe against the whole store so archeology's findings
+become `add`, after an embedding + symbol dedupe against the whole store so archaeology's findings
 are not re-added.
 
 `retire` has a free mechanical trigger: the pinned span is gone or the symbol was deleted. Detected
@@ -280,7 +280,7 @@ An `amend` preserves the existing claim's status unless the amendment invalidate
 verification, in which case it drops to `contested` and queues. Consequence: a `contested`
 forward-added claim does not reach the rendered document body (§7) until a human accepts it.
 
-**The why-layer forward is a fundamentally easier problem than the why-layer backward.** Archeology
+**The why-layer forward is a fundamentally easier problem than the why-layer backward.** Archaeology
 guesses which of a thousand old commits explains a span; absorb knows — the PR that just merged,
 its ticket, its discussion. Same grounding check, expected far higher corroboration rate. This is
 the pipeline's central thesis and §10 gates it.
@@ -291,7 +291,7 @@ interface files — or a cross-module diff), then a cheap screen for decision-sh
 (alternatives raised, disagreement resolved, "we went with X instead of Y"), then expensive
 extraction of decision + alternatives + consequences.
 
-ADR candidates **never auto-land**. Missing an ADR is recoverable — archeology can find it later.
+ADR candidates **never auto-land**. Missing an ADR is recoverable — archaeology can find it later.
 Inventing one poisons the document permanently.
 
 ## 7. Rendering (`render/`)
@@ -358,25 +358,25 @@ metric but **not** harmless here, because `absorb` pins against the merge commit
 merges compound it. This must be fixed or explicitly worked around before absorb can pin correctly,
 and belongs early in the implementation plan.
 
-## 9. Archeology's revised role
+## 9. Archaeology's revised role
 
-Archeology is not scaffolding to be discarded. It is the other half of a coverage story.
+Archaeology is not scaffolding to be discarded. It is the other half of a coverage story.
 
-**Forward covers the hot set; archeology covers the cold set.** The forward pipeline only ever sees
+**Forward covers the hot set; archaeology covers the cold set.** The forward pipeline only ever sees
 the blast radius of merged PRs. In a 3M-LOC monorepo most code does not change in a given year, and
-that code has no PR to witness it. Archeology is the only path to it. Neither pipeline alone
+that code has no PR to witness it. Archaeology is the only path to it. Neither pipeline alone
 produces a document; together they do.
 
 ### 9.1 The bar drops for hot code, not for cold code
 
-A weak archeology claim on code that gets touched is self-correcting — absorb re-synthesizes that
+A weak archaeology claim on code that gets touched is self-correcting — absorb re-synthesizes that
 span and reconciles. A weak claim on cold code stays wrong indefinitely. The why-layer gate
 (≥ 0.80 corroborated precision) therefore still matters, but for a smaller and better-defined
 population than it has been treated as. It should stop being the blocker gating all further work.
 
 ### 9.2 Provenance and promotion
 
-`Origin.provenance` distinguishes `recovered` (archeology inferred it) from `witnessed` (a real PR
+`Origin.provenance` distinguishes `recovered` (archaeology inferred it) from `witnessed` (a real PR
 confirmed it). A recovered claim is **promoted to witnessed** the first time absorb reconciles a PR
 against its span and returns `unchanged` or `amend`; `origin.witnessed_by_pr` records which.
 
@@ -386,13 +386,13 @@ It climbs on its own as the team works, and it belongs on the dashboard.
 
 ### 9.3 The no-overwrite invariant
 
-Two writers now share one store. **Archeology never overwrites a witnessed claim.** A re-run is
-additive over unwitnessed regions only. Without this rule, re-running archeology on a component
+Two writers now share one store. **Archaeology never overwrites a witnessed claim.** A re-run is
+additive over unwitnessed regions only. Without this rule, re-running archaeology on a component
 silently reverts everything the forward pipeline learned.
 
 ### 9.4 Operating cadence
 
-Run archeology on component onboarding and periodically for cold code — not continuously.
+Run archaeology on component onboarding and periodically for cold code — not continuously.
 
 ### 9.5 Migration
 
@@ -409,9 +409,9 @@ Bug-fix PRs are natural positives; pure refactors are natural negatives. This yi
 evaluation set at near-zero labeling cost and allows the gates to be measured before a single live
 PR sees a comment.
 
-The same backtest measures the archeology why-gate more cheaply than hand-labeling ~100 commits:
+The same backtest measures the archaeology why-gate more cheaply than hand-labeling ~100 commits:
 replay backward recovery blind against the pre-merge tree and check the recovered rationale against
-what the PR actually said. **The forward work unblocks the archeology gate rather than competing
+what the PR actually said. **The forward work unblocks the archaeology gate rather than competing
 with it.**
 
 ### 10.2 Gates
@@ -419,7 +419,7 @@ with it.**
 | # | Gate | Threshold |
 |---|---|---|
 | 1 | Guardrail precision on the backtest — of findings posted, the share a reviewer calls real | ≥ 0.90 |
-| 2 | Forward why-corroboration rate on the same component | ≥ 0.85 absolute **and** ≥ 15 points above the archeology run |
+| 2 | Forward why-corroboration rate on the same component | ≥ 0.85 absolute **and** ≥ 15 points above the archaeology run |
 | 3 | Reconcile accuracy on hand-labeled `(proposed, existing)` pairs | ≥ 0.90 |
 | 4 | Renderer premise spike (§7.1) | human verdict, no numeric gate |
 
@@ -436,7 +436,7 @@ Most of this is LLM-free and fast to test:
 - Fabricated-hunk rejection, mirroring the existing why-layer grounding tests.
 - `absorb` run twice over the same PR produces an identical store (idempotency).
 - Concurrent edit → `StaleClaimError` → exception queue, no clobber.
-- Archeology re-run does not modify a witnessed claim (§9.3).
+- Archaeology re-run does not modify a witnessed claim (§9.3).
 - Golden-file test over a fixture claim store for both renderers.
 - `reconcile` table-driven fixtures with recorded model responses.
 - Migration script (§9.5) covered by a test.

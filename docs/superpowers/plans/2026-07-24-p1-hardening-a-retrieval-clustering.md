@@ -17,7 +17,7 @@
 - **All schema changes are additive** — new tables only, never alter/drop existing ones.
 - **The downstream synthesize/verify path (`synthesize_claims`, `verify_claims`) is unchanged.** This track only changes how the bundle and the feature-area list are produced.
 - **Graceful degradation is a tested path, never a crash.** Ollama unreachable or model missing → graph-only retrieval + clustering, logged as a coverage note.
-- **Config** lives in a new optional `[retrieval]` block in `archeon.toml`, mirroring `[llm]`. It has code defaults and is NOT added to `config.REQUIRED` (existing configs and tests must keep working).
+- **Config** lives in a new optional `[retrieval]` block in `archaeon.toml`, mirroring `[llm]`. It has code defaults and is NOT added to `config.REQUIRED` (existing configs and tests must keep working).
 - **Symbols table does not store code text.** The `symbols.source` column holds the scanner name (`"clang"`/`"tree-sitter"`), not source. A symbol's code is read from disk via `repo_path / path` sliced to `[line, end_line]`. All retrieval code uses the shared loader from Task 2 for this.
 - **TDD, DRY, YAGNI, frequent commits.** One test-cycle per task; commit at the end of each task.
 
@@ -30,32 +30,32 @@
 ## File Structure
 
 **New files**
-- `src/archeon/codegraph/symsource.py` — shared loader: symbol rows joined with their on-disk source text (Task 2).
-- `src/archeon/codegraph/edges.py` — reference + include edge extraction (Task 3).
-- `src/archeon/retrieval/__init__.py` — new package (Task 4).
-- `src/archeon/retrieval/embed.py` — Ollama embedding index + cosine helpers (Task 4).
-- `src/archeon/retrieval/cluster.py` — weighted graph + community detection + cheap-model labels (Task 5).
-- `src/archeon/retrieval/bundle.py` — token-bounded, ranked, whole-symbol bundle builder (Task 6).
+- `src/archaeon/codegraph/symsource.py` — shared loader: symbol rows joined with their on-disk source text (Task 2).
+- `src/archaeon/codegraph/edges.py` — reference + include edge extraction (Task 3).
+- `src/archaeon/retrieval/__init__.py` — new package (Task 4).
+- `src/archaeon/retrieval/embed.py` — Ollama embedding index + cosine helpers (Task 4).
+- `src/archaeon/retrieval/cluster.py` — weighted graph + community detection + cheap-model labels (Task 5).
+- `src/archaeon/retrieval/bundle.py` — token-bounded, ranked, whole-symbol bundle builder (Task 6).
 - Tests: `tests/test_symsource.py`, `tests/test_edges.py`, `tests/test_embed.py`, `tests/test_cluster.py`, `tests/test_bundle.py`, `tests/test_retrieval_config.py`.
 
 **Modified files**
-- `src/archeon/schema.sql` — five additive tables (Task 1).
-- `src/archeon/config.py` — `retrieval()` accessor + defaults (Task 1).
+- `src/archaeon/schema.sql` — five additive tables (Task 1).
+- `src/archaeon/config.py` — `retrieval()` accessor + defaults (Task 1).
 - `pyproject.toml` — add `numpy`, `networkx` (Task 1).
-- `src/archeon/codegraph/scan.py` — call `extract_edges` at end of `scan_component` (Task 3).
-- `src/archeon/cli.py` — new `embed` and `cluster` commands; rework `synthesize` (Task 7).
-- `archeon.example.toml` — document `[retrieval]` (Task 7).
+- `src/archaeon/codegraph/scan.py` — call `extract_edges` at end of `scan_component` (Task 3).
+- `src/archaeon/cli.py` — new `embed` and `cluster` commands; rework `synthesize` (Task 7).
+- `archaeon.example.toml` — document `[retrieval]` (Task 7).
 
 **Unchanged (do not touch the logic)**
-- `src/archeon/claims/recover.py` — `synthesize_claims` / `verify_claims` stay exactly as-is. `build_feature_bundle` also stays (legacy file-level packer; its test must keep passing). The new symbol-level packer lives in `retrieval/bundle.py`.
+- `src/archaeon/claims/recover.py` — `synthesize_claims` / `verify_claims` stay exactly as-is. `build_feature_bundle` also stays (legacy file-level packer; its test must keep passing). The new symbol-level packer lives in `retrieval/bundle.py`.
 
 ---
 
 ## Task 1: Additive schema, retrieval config, dependencies
 
 **Files:**
-- Modify: `src/archeon/schema.sql` (append five tables)
-- Modify: `src/archeon/config.py`
+- Modify: `src/archaeon/schema.sql` (append five tables)
+- Modify: `src/archaeon/config.py`
 - Modify: `pyproject.toml:6-15` (dependencies)
 - Test: `tests/test_retrieval_config.py`, extend `tests/test_db.py`
 
@@ -95,7 +95,7 @@ Expected: resolves and installs `numpy` and `networkx` with no error.
 Create `tests/test_retrieval_config.py`:
 
 ```python
-from archeon import config as config_mod
+from archaeon import config as config_mod
 
 
 def test_retrieval_defaults_when_absent():
@@ -120,11 +120,11 @@ def test_retrieval_overrides_merge_over_defaults():
 - [ ] **Step 4: Run it to verify it fails**
 
 Run: `uv run pytest tests/test_retrieval_config.py -v`
-Expected: FAIL with `AttributeError: module 'archeon.config' has no attribute 'retrieval'`.
+Expected: FAIL with `AttributeError: module 'archaeon.config' has no attribute 'retrieval'`.
 
 - [ ] **Step 5: Implement the config accessor**
 
-Edit `src/archeon/config.py`, adding after the `REQUIRED` dict (do not add `retrieval` to `REQUIRED`):
+Edit `src/archaeon/config.py`, adding after the `REQUIRED` dict (do not add `retrieval` to `REQUIRED`):
 
 ```python
 RETRIEVAL_DEFAULTS = {
@@ -160,7 +160,7 @@ Expected: PASS (2 passed).
 
 - [ ] **Step 7: Add the additive schema**
 
-Append to `src/archeon/schema.sql`:
+Append to `src/archaeon/schema.sql`:
 
 ```sql
 CREATE TABLE IF NOT EXISTS symbol_edges(
@@ -202,7 +202,7 @@ CREATE TABLE IF NOT EXISTS cluster_members(
 Add to `tests/test_db.py` (create the file if the assertion style below doesn't already exist there; if it exists, append this function):
 
 ```python
-from archeon.db import connect
+from archaeon.db import connect
 
 
 def test_retrieval_tables_created(tmp_path):
@@ -227,7 +227,7 @@ Expected: all pre-existing tests still pass (the added `[retrieval]` is optional
 - [ ] **Step 11: Commit**
 
 ```bash
-git add pyproject.toml uv.lock src/archeon/schema.sql src/archeon/config.py tests/test_retrieval_config.py tests/test_db.py
+git add pyproject.toml uv.lock src/archaeon/schema.sql src/archaeon/config.py tests/test_retrieval_config.py tests/test_db.py
 git commit -m "feat(retrieval): additive schema, [retrieval] config defaults, numpy+networkx deps"
 ```
 
@@ -238,7 +238,7 @@ git commit -m "feat(retrieval): additive schema, [retrieval] config defaults, nu
 The `symbols` table stores `path`, `line`, `end_line` but not code text. Every retrieval unit (edges, embed, bundle) needs each symbol's actual source. Centralize that read here so line-slicing (an off-by-one hazard) is written and tested once.
 
 **Files:**
-- Create: `src/archeon/codegraph/symsource.py`
+- Create: `src/archaeon/codegraph/symsource.py`
 - Test: `tests/test_symsource.py`
 
 **Interfaces:**
@@ -250,8 +250,8 @@ The `symbols` table stores `path`, `line`, `end_line` but not code text. Every r
 Create `tests/test_symsource.py`:
 
 ```python
-from archeon.codegraph.symsource import symbol_rows
-from archeon.db import connect
+from archaeon.codegraph.symsource import symbol_rows
+from archaeon.db import connect
 
 
 def _insert(conn, name, path, line, end_line):
@@ -295,11 +295,11 @@ def test_symbol_rows_prefix_filter_escapes_underscore(tmp_path):
 - [ ] **Step 2: Run it to verify it fails**
 
 Run: `uv run pytest tests/test_symsource.py -v`
-Expected: FAIL with `ModuleNotFoundError: No module named 'archeon.codegraph.symsource'`.
+Expected: FAIL with `ModuleNotFoundError: No module named 'archaeon.codegraph.symsource'`.
 
 - [ ] **Step 3: Implement the loader**
 
-Create `src/archeon/codegraph/symsource.py`:
+Create `src/archaeon/codegraph/symsource.py`:
 
 ```python
 from pathlib import Path
@@ -353,7 +353,7 @@ Expected: PASS (3 passed).
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/archeon/codegraph/symsource.py tests/test_symsource.py
+git add src/archaeon/codegraph/symsource.py tests/test_symsource.py
 git commit -m "feat(codegraph): shared symbol-source loader (path+line -> code text)"
 ```
 
@@ -362,8 +362,8 @@ git commit -m "feat(codegraph): shared symbol-source loader (path+line -> code t
 ## Task 3: Reference + include edge extraction
 
 **Files:**
-- Create: `src/archeon/codegraph/edges.py`
-- Modify: `src/archeon/codegraph/scan.py` (call `extract_edges` at the end of `scan_component`)
+- Create: `src/archaeon/codegraph/edges.py`
+- Modify: `src/archaeon/codegraph/scan.py` (call `extract_edges` at the end of `scan_component`)
 - Test: `tests/test_edges.py`
 
 **Interfaces:**
@@ -375,8 +375,8 @@ git commit -m "feat(codegraph): shared symbol-source loader (path+line -> code t
 Create `tests/test_edges.py`:
 
 ```python
-from archeon.codegraph.edges import extract_edges
-from archeon.db import connect
+from archaeon.codegraph.edges import extract_edges
+from archaeon.db import connect
 
 
 def _insert(conn, name, path, line, end_line):
@@ -440,17 +440,17 @@ def test_extract_edges_is_a_full_rebuild(tmp_path):
 - [ ] **Step 2: Run it to verify it fails**
 
 Run: `uv run pytest tests/test_edges.py -v`
-Expected: FAIL with `ModuleNotFoundError: No module named 'archeon.codegraph.edges'`.
+Expected: FAIL with `ModuleNotFoundError: No module named 'archaeon.codegraph.edges'`.
 
 - [ ] **Step 3: Implement edge extraction**
 
-Create `src/archeon/codegraph/edges.py`:
+Create `src/archaeon/codegraph/edges.py`:
 
 ```python
 import re
 from pathlib import Path
 
-from archeon.codegraph.symsource import symbol_rows
+from archaeon.codegraph.symsource import symbol_rows
 
 _IDENT = re.compile(r"[A-Za-z_]\w*")
 _INCLUDE = re.compile(r'^\s*#\s*include\s*[<"]([^>"]+)[>"]', re.MULTILINE)
@@ -520,10 +520,10 @@ Expected: PASS (3 passed).
 
 - [ ] **Step 5: Wire edge extraction into the scan**
 
-Edit `src/archeon/codegraph/scan.py`. Add the import near the top (after the existing `from archeon.codegraph.ts_scan import ...` line):
+Edit `src/archaeon/codegraph/scan.py`. Add the import near the top (after the existing `from archaeon.codegraph.ts_scan import ...` line):
 
 ```python
-from archeon.codegraph.edges import extract_edges
+from archaeon.codegraph.edges import extract_edges
 ```
 
 Then in `scan_component`, replace the final two lines:
@@ -553,7 +553,7 @@ Expected: PASS. `test_scan_falls_back_and_records_gaps` still passes; `extract_e
 - [ ] **Step 7: Commit**
 
 ```bash
-git add src/archeon/codegraph/edges.py src/archeon/codegraph/scan.py tests/test_edges.py
+git add src/archaeon/codegraph/edges.py src/archaeon/codegraph/scan.py tests/test_edges.py
 git commit -m "feat(codegraph): extract reference+include edges during scan"
 ```
 
@@ -562,8 +562,8 @@ git commit -m "feat(codegraph): extract reference+include edges during scan"
 ## Task 4: Ollama embedding index
 
 **Files:**
-- Create: `src/archeon/retrieval/__init__.py` (empty package marker)
-- Create: `src/archeon/retrieval/embed.py`
+- Create: `src/archaeon/retrieval/__init__.py` (empty package marker)
+- Create: `src/archaeon/retrieval/embed.py`
 - Test: `tests/test_embed.py`
 
 **Interfaces:**
@@ -584,9 +584,9 @@ import numpy as np
 import pytest
 import requests
 
-from archeon import retrieval
-from archeon.retrieval import embed as embed_mod
-from archeon.db import connect
+from archaeon import retrieval
+from archaeon.retrieval import embed as embed_mod
+from archaeon.db import connect
 
 
 def _insert(conn, name, path, line, end_line):
@@ -663,24 +663,24 @@ def test_load_vectors_roundtrip_and_cosine(tmp_path, monkeypatch):
 - [ ] **Step 2: Run it to verify it fails**
 
 Run: `uv run pytest tests/test_embed.py -v`
-Expected: FAIL with `ModuleNotFoundError: No module named 'archeon.retrieval'`.
+Expected: FAIL with `ModuleNotFoundError: No module named 'archaeon.retrieval'`.
 
 - [ ] **Step 3: Create the package marker**
 
-Create `src/archeon/retrieval/__init__.py` (empty file):
+Create `src/archaeon/retrieval/__init__.py` (empty file):
 
 ```python
 ```
 
 - [ ] **Step 4: Implement the embedding index**
 
-Create `src/archeon/retrieval/embed.py`:
+Create `src/archaeon/retrieval/embed.py`:
 
 ```python
 import numpy as np
 import requests
 
-from archeon.codegraph.symsource import symbol_rows
+from archaeon.codegraph.symsource import symbol_rows
 
 CODE_PROMPT = "Represent this C/C++ code for retrieval:\n"
 
@@ -752,7 +752,7 @@ Expected: PASS (3 passed).
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/archeon/retrieval/__init__.py src/archeon/retrieval/embed.py tests/test_embed.py
+git add src/archaeon/retrieval/__init__.py src/archaeon/retrieval/embed.py tests/test_embed.py
 git commit -m "feat(retrieval): local Ollama embedding index with graph-only degradation"
 ```
 
@@ -761,11 +761,11 @@ git commit -m "feat(retrieval): local Ollama embedding index with graph-only deg
 ## Task 5: Clusterer (weighted graph + community detection + labels)
 
 **Files:**
-- Create: `src/archeon/retrieval/cluster.py`
+- Create: `src/archaeon/retrieval/cluster.py`
 - Test: `tests/test_cluster.py`
 
 **Interfaces:**
-- Consumes: `symbol_rows` (Task 2); `load_vectors`, `cosine` (Task 4); `symbol_edges`, `file_edges`, `coupling`, `clusters`, `cluster_members` tables; `CLAIM_TYPES` from `archeon.claims.schema`; `_strip_fence` from `archeon.claims.recover`; `config.retrieval` dict shape (Task 1).
+- Consumes: `symbol_rows` (Task 2); `load_vectors`, `cosine` (Task 4); `symbol_edges`, `file_edges`, `coupling`, `clusters`, `cluster_members` tables; `CLAIM_TYPES` from `archaeon.claims.schema`; `_strip_fence` from `archaeon.claims.recover`; `config.retrieval` dict shape (Task 1).
 - Produces:
   - `build_symbol_graph(conn, repo_path, retr: dict, vectors: dict[int, np.ndarray]) -> networkx.Graph` — nodes = all symbol ids; edge `weight` = weighted sum of reference/include/coupling/embedding signals.
   - `cluster_symbols(conn, repo_path, component: str, retr: dict, label_fn=None) -> list[dict]` — persists `clusters` + `cluster_members` (full rebuild), returns `[{"id": int, "label": str, "members": list[int], "candidate_types": str}, ...]`. Graph-only when `vectors` empty. `label_fn(member_rows: list[dict]) -> tuple[str, str]` is optional (label, comma-joined candidate types).
@@ -779,9 +779,9 @@ Create `tests/test_cluster.py`:
 ```python
 import json
 
-from archeon.retrieval import cluster as cluster_mod
-from archeon.db import connect
-from archeon import config as config_mod
+from archaeon.retrieval import cluster as cluster_mod
+from archaeon.db import connect
+from archaeon import config as config_mod
 
 
 def _insert(conn, name, path, line, end_line):
@@ -860,11 +860,11 @@ def test_label_cluster_survives_bad_json():
 - [ ] **Step 2: Run it to verify it fails**
 
 Run: `uv run pytest tests/test_cluster.py -v`
-Expected: FAIL with `ModuleNotFoundError: No module named 'archeon.retrieval.cluster'`.
+Expected: FAIL with `ModuleNotFoundError: No module named 'archaeon.retrieval.cluster'`.
 
 - [ ] **Step 3: Implement the clusterer**
 
-Create `src/archeon/retrieval/cluster.py`:
+Create `src/archaeon/retrieval/cluster.py`:
 
 ```python
 import json
@@ -873,10 +873,10 @@ import networkx as nx
 import numpy as np
 from networkx.algorithms.community import greedy_modularity_communities
 
-from archeon.claims.recover import _strip_fence
-from archeon.claims.schema import CLAIM_TYPES
-from archeon.codegraph.symsource import symbol_rows
-from archeon.retrieval.embed import load_vectors
+from archaeon.claims.recover import _strip_fence
+from archaeon.claims.schema import CLAIM_TYPES
+from archaeon.codegraph.symsource import symbol_rows
+from archaeon.retrieval.embed import load_vectors
 
 LABEL_SYSTEM = (
     "You name a cluster of related C/C++ symbols as a short feature area and "
@@ -1022,7 +1022,7 @@ Expected: PASS (4 passed).
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/archeon/retrieval/cluster.py tests/test_cluster.py
+git add src/archaeon/retrieval/cluster.py tests/test_cluster.py
 git commit -m "feat(retrieval): hybrid graph clusterer with cheap-model cluster labels"
 ```
 
@@ -1031,7 +1031,7 @@ git commit -m "feat(retrieval): hybrid graph clusterer with cheap-model cluster 
 ## Task 6: Token-bounded, ranked bundle builder
 
 **Files:**
-- Create: `src/archeon/retrieval/bundle.py`
+- Create: `src/archaeon/retrieval/bundle.py`
 - Test: `tests/test_bundle.py`
 
 **Interfaces:**
@@ -1049,7 +1049,7 @@ Create `tests/test_bundle.py`:
 ```python
 import numpy as np
 
-from archeon.retrieval import bundle as bundle_mod
+from archaeon.retrieval import bundle as bundle_mod
 
 
 def _sym(i, name, line, nlines):
@@ -1099,17 +1099,17 @@ def test_rank_returns_input_order_without_centroid():
 - [ ] **Step 2: Run it to verify it fails**
 
 Run: `uv run pytest tests/test_bundle.py -v`
-Expected: FAIL with `ModuleNotFoundError: No module named 'archeon.retrieval.bundle'`.
+Expected: FAIL with `ModuleNotFoundError: No module named 'archaeon.retrieval.bundle'`.
 
 - [ ] **Step 3: Implement the bundle builder**
 
-Create `src/archeon/retrieval/bundle.py`:
+Create `src/archaeon/retrieval/bundle.py`:
 
 ```python
 import numpy as np
 
-from archeon.codegraph.symsource import symbol_rows
-from archeon.retrieval.embed import cosine, load_vectors
+from archaeon.codegraph.symsource import symbol_rows
+from archaeon.retrieval.embed import cosine, load_vectors
 
 
 def estimate_tokens(text: str) -> int:
@@ -1173,7 +1173,7 @@ Expected: PASS (5 passed).
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/archeon/retrieval/bundle.py tests/test_bundle.py
+git add src/archaeon/retrieval/bundle.py tests/test_bundle.py
 git commit -m "feat(retrieval): token-bounded whole-symbol bundle builder with centroid ranking"
 ```
 
@@ -1182,8 +1182,8 @@ git commit -m "feat(retrieval): token-bounded whole-symbol bundle builder with c
 ## Task 7: CLI wiring (`embed`, `cluster`, reworked `synthesize`) + example config
 
 **Files:**
-- Modify: `src/archeon/cli.py`
-- Modify: `archeon.example.toml`
+- Modify: `src/archaeon/cli.py`
+- Modify: `archaeon.example.toml`
 - Test: extend `tests/test_cli.py`
 
 **Interfaces:**
@@ -1192,7 +1192,7 @@ git commit -m "feat(retrieval): token-bounded whole-symbol bundle builder with c
 
 - [ ] **Step 1: Write the failing CLI test**
 
-Add to `tests/test_cli.py` (the `_setup` helper already builds a git repo + `archeon.toml`). Append:
+Add to `tests/test_cli.py` (the `_setup` helper already builds a git repo + `archaeon.toml`). Append:
 
 ```python
 def test_embed_degrades_when_ollama_down(tmp_path, monkeypatch):
@@ -1200,7 +1200,7 @@ def test_embed_degrades_when_ollama_down(tmp_path, monkeypatch):
     runner = CliRunner()
     assert runner.invoke(main, ["scan", "--config", str(config)]).exit_code == 0
 
-    import archeon.retrieval.embed as embed_mod
+    import archaeon.retrieval.embed as embed_mod
     import requests as _rq
 
     def boom(texts, model, endpoint, dims):
@@ -1217,13 +1217,13 @@ def test_cluster_runs_graph_only_without_ollama(tmp_path, monkeypatch):
     runner = CliRunner()
     assert runner.invoke(main, ["scan", "--config", str(config)]).exit_code == 0
 
-    import archeon.retrieval.embed as embed_mod
+    import archaeon.retrieval.embed as embed_mod
     import requests as _rq
     monkeypatch.setattr(embed_mod, "embed_texts",
                         lambda *a, **k: (_ for _ in ()).throw(
                             _rq.RequestException("refused")))
     # cheap-model labelling must not hit the network in the test
-    import archeon.retrieval.cluster as cluster_mod
+    import archaeon.retrieval.cluster as cluster_mod
     monkeypatch.setattr(cluster_mod, "label_cluster", lambda rows, ask: ("", ""))
 
     r = runner.invoke(main, ["cluster", "--config", str(config)])
@@ -1238,14 +1238,14 @@ Expected: FAIL — `embed`/`cluster` are not yet commands (`Error: No such comma
 
 - [ ] **Step 3: Add the `embed` and `cluster` commands**
 
-Edit `src/archeon/cli.py`. Add these two commands after `cli_scan` (around `cli.py:122`):
+Edit `src/archaeon/cli.py`. Add these two commands after `cli_scan` (around `cli.py:122`):
 
 ```python
 @main.command("embed")
 @config_option
 def cli_embed(config_path):
     """Build the local embedding index for scanned symbols (idempotent)."""
-    from archeon.retrieval.embed import build_embedding_index
+    from archaeon.retrieval.embed import build_embedding_index
     cfg, conn = _load(config_path)
     retr = config_mod.retrieval(cfg)
     r = build_embedding_index(conn, Path(cfg["component"]["repo_path"]),
@@ -1264,10 +1264,10 @@ def cli_embed(config_path):
 @config_option
 def cli_cluster(config_path):
     """Cluster scanned symbols into feature areas (embeds first if possible)."""
-    from archeon.llm import AgentClassifier
-    from archeon.retrieval.cluster import (
+    from archaeon.llm import AgentClassifier
+    from archaeon.retrieval.cluster import (
         LABEL_SYSTEM, cluster_symbols, label_cluster)
-    from archeon.retrieval.embed import build_embedding_index
+    from archaeon.retrieval.embed import build_embedding_index
     cfg, conn = _load(config_path)
     retr = config_mod.retrieval(cfg)
     e = build_embedding_index(conn, Path(cfg["component"]["repo_path"]),
@@ -1311,13 +1311,13 @@ def cli_synthesize(config_path, feature, cluster_id, all_clusters, out_dir):
     point (mapped to the clusters overlapping that prefix, or an ad-hoc ranked
     bundle of the prefix's symbols if clustering hasn't been run).
     """
-    from archeon.claims.recover import (
+    from archaeon.claims.recover import (
         SYNTH_SYSTEM, VERIFY_SYSTEM, synthesize_claims, verify_claims)
-    from archeon.claims.schema import save_claims
-    from archeon.llm import AgentClassifier
-    from archeon.retrieval.bundle import (
+    from archaeon.claims.schema import save_claims
+    from archaeon.llm import AgentClassifier
+    from archaeon.retrieval.bundle import (
         bundle_for_cluster, pack_symbols, rank_symbols)
-    from archeon.codegraph.symsource import symbol_rows
+    from archaeon.codegraph.symsource import symbol_rows
 
     if sum(bool(x) for x in (feature, cluster_id is not None,
                              all_clusters)) != 1:
@@ -1390,7 +1390,7 @@ Expected: PASS — including the two new degradation tests and the pre-existing 
 
 - [ ] **Step 6: Document `[retrieval]` in the example config**
 
-Edit `archeon.example.toml`, appending after the `[llm]` block:
+Edit `archaeon.example.toml`, appending after the `[llm]` block:
 
 ```toml
 # [retrieval]                              # optional — these are the defaults
@@ -1414,7 +1414,7 @@ Expected: all tests pass (existing + all new).
 - [ ] **Step 8: Commit**
 
 ```bash
-git add src/archeon/cli.py archeon.example.toml tests/test_cli.py
+git add src/archaeon/cli.py archaeon.example.toml tests/test_cli.py
 git commit -m "feat(cli): embed + cluster commands and cluster-driven synthesize"
 ```
 
@@ -1425,10 +1425,10 @@ git commit -m "feat(cli): embed + cluster commands and cluster-driven synthesize
 After Task 7, validate against the real `motor-ctrl` component (needs a running Ollama with `qwen3-embedding:4b` pulled, and Claude CLI auth). This is the spec's acceptance evidence, run by hand:
 
 ```bash
-uv run archeon scan --config archeon.example.toml
-uv run archeon cluster --config archeon.example.toml
-uv run archeon synthesize --config archeon.example.toml --all-clusters --out claims_nav
-uv run archeon claims-eval --claims claims_nav --labels claim_labels.csv
+uv run archaeon scan --config archaeon.example.toml
+uv run archaeon cluster --config archaeon.example.toml
+uv run archaeon synthesize --config archaeon.example.toml --all-clusters --out claims_nav
+uv run archaeon claims-eval --claims claims_nav --labels claim_labels.csv
 ```
 
 Confirm, per spec §7:

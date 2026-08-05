@@ -6,7 +6,7 @@ C review UI).
 **Depends on:** nothing upstream — reads the `claims/*.yaml` artifacts that already exist.
 Reads Spec A's cluster metadata *if present*; degrades to flat per-file grouping if not.
 
-Related: [design spec §7 review and visualization](2026-07-23-archeon-design.md) ·
+Related: [design spec §7 review and visualization](2026-07-23-archaeon-design.md) ·
 P1 spike note *(internal validation run — not in this repo)*
 
 ## 1. Problem

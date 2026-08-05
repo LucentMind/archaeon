@@ -1,11 +1,11 @@
 import json
 
-from archeon.claims.schema import (
+from archaeon.claims.schema import (
     CODE_INFERRED_MAX_CONFIDENCE, Claim, Evidence)
-from archeon.claims.why import (
+from archaeon.claims.why import (
     artifact_body, ground_citations, normalize_text, synthesize_why_claims,
     verify_why_claims)
-from archeon.db import connect
+from archaeon.db import connect
 
 
 def _lake(tmp_path):

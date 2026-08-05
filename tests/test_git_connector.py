@@ -1,8 +1,8 @@
 import subprocess
 from pathlib import Path
 
-from archeon.connectors.git_connector import ingest_git
-from archeon.db import connect
+from archaeon.connectors.git_connector import ingest_git
+from archaeon.db import connect
 
 
 def _git(repo: Path, *args: str) -> None:
@@ -80,7 +80,7 @@ def test_bot_filter_can_be_disabled(tmp_path):
     assert n == 3  # the bot commit is now kept
 
 
-from archeon.connectors.git_connector import (  # noqa: E402
+from archaeon.connectors.git_connector import (  # noqa: E402
     blob_sha, head_sha, is_dirty, show_file)
 
 

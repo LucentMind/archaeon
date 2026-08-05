@@ -1,8 +1,8 @@
-from archeon.claims.schema import Claim, Evidence
-from archeon.claims.why_corpus import (
+from archaeon.claims.schema import Claim, Evidence
+from archaeon.claims.why_corpus import (
     build_corpus, collect_artifacts, spans_for_claims)
-from archeon.db import connect
-from archeon.retrieval.archaeology import ArtifactRefs
+from archaeon.db import connect
+from archaeon.retrieval.archaeology import ArtifactRefs
 
 
 def _pinned(ref, sha, start, end):
@@ -178,7 +178,7 @@ def test_missing_artifact_rows_are_skipped_not_fatal(tmp_path):
 
 
 def test_collect_artifacts_walks_spans_to_artifacts(tmp_path, monkeypatch):
-    import archeon.claims.why_corpus as mod
+    import archaeon.claims.why_corpus as mod
     conn = _lake(tmp_path)
     conn.execute("INSERT INTO commits(sha, author, date, message) "
                  "VALUES ('sha_x', 'a', '2026-01-01', 'm')")
@@ -213,7 +213,7 @@ def test_collect_artifacts_walks_spans_to_artifacts(tmp_path, monkeypatch):
 
 def test_collect_artifacts_falls_back_to_file_level_commits(tmp_path,
                                                              monkeypatch):
-    import archeon.claims.why_corpus as mod
+    import archaeon.claims.why_corpus as mod
     conn = _lake(tmp_path)
     conn.execute("INSERT INTO commits(sha, author, date, message) "
                  "VALUES ('sha_y', 'a', '2026-01-01', 'm')")

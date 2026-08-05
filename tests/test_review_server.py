@@ -1,8 +1,8 @@
 import yaml
 from fastapi.testclient import TestClient
 
-from archeon.db import connect
-from archeon.review.server import create_app
+from archaeon.db import connect
+from archaeon.review.server import create_app
 
 
 def _write(claims_dir, claim_id, **over):

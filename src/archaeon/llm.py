@@ -4,7 +4,7 @@ import os
 
 from claude_agent_sdk import ClaudeAgentOptions, query
 
-from archeon.cost import is_success_result, is_terminal_result
+from archaeon.cost import is_success_result, is_terminal_result
 
 SYSTEM_PROMPT = (
     "You link git commits to issue-tracker tickets. Reply with exactly one "
@@ -45,7 +45,7 @@ class AgentClassifier:
         self._model = model
         self._system_prompt = system_prompt
         self._max_turns = max_turns
-        # Optional archeon.cost.CostMeter. None (the default) means no
+        # Optional archaeon.cost.CostMeter. None (the default) means no
         # recording and byte-for-byte the pre-cost-accounting behavior.
         self._meter = meter
         self._stage = stage

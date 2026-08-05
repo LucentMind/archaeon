@@ -1,7 +1,7 @@
 import yaml
 
-from archeon.review import store
-from archeon.db import connect
+from archaeon.review import store
+from archaeon.db import connect
 
 
 def _write(claims_dir, claim_id, **over):

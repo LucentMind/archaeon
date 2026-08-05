@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from archeon.cost import (
+from archaeon.cost import (
     ROUTE_VARS, CallCost, CostMeter, billing_route_overridden,
     call_cost_from_message, is_error_result, is_success_result,
     is_terminal_result)

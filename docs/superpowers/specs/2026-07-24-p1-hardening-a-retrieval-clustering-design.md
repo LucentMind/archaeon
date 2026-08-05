@@ -7,7 +7,7 @@ C review UI). The why-layer (Pass 2) is deferred until A and B land.
 **Consumed by:** Spec C (reads cluster metadata; degrades gracefully if absent);
 the deferred why-layer (scopes enrichment per feature area).
 
-Related: [design spec §6 recovery pipeline](2026-07-23-archeon-design.md) ·
+Related: [design spec §6 recovery pipeline](2026-07-23-archaeon-design.md) ·
 P1 spike note *(internal validation run — not in this repo)* ·
 [P1 spike exit checklist](../../p1-spike-exit-checklist.md)
 
@@ -52,7 +52,7 @@ so each synthesis call sees the code that matters rather than a truncated prefix
   clustering can use short vectors (e.g. 256) and ranking can use full ones.
 
 Config: `[retrieval] embed_model`, `embed_endpoint`, `embed_dims`, `token_budget` in
-`archeon.toml`, mirroring the existing `[llm]` block.
+`archaeon.toml`, mirroring the existing `[llm]` block.
 
 ## 4. Architecture
 

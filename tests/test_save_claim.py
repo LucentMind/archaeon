@@ -1,7 +1,7 @@
 import pytest
 import yaml
 
-from archeon.claims import schema
+from archaeon.claims import schema
 
 
 def _write(claims_dir, claim_id, extra=None):

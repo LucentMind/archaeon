@@ -1,7 +1,7 @@
 import numpy as np
 
-from archeon.codegraph.symsource import symbol_rows
-from archeon.retrieval.embed import cosine, load_vectors
+from archaeon.codegraph.symsource import symbol_rows
+from archaeon.retrieval.embed import cosine, load_vectors
 
 
 def estimate_tokens(text: str) -> int:

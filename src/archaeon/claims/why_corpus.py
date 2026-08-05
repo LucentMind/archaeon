@@ -4,10 +4,10 @@ Pure git + SQL: no LLM anywhere in this module, so the whole retrieval
 half of Pass 2 is testable without a model.
 """
 
-from archeon.claims.pin import parse_ref
-from archeon.retrieval.archaeology import (
+from archaeon.claims.pin import parse_ref
+from archaeon.retrieval.archaeology import (
     artifacts_for_commits, file_level_commits, shaping_commits)
-from archeon.retrieval.bundle import estimate_tokens
+from archaeon.retrieval.bundle import estimate_tokens
 
 # Sorts last when an artifact has no usable timestamp.
 _NO_TS = ""

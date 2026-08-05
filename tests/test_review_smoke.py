@@ -44,7 +44,7 @@ def test_browse_and_accept_round_trip(tmp_path):
     _write_claim(tmp_path)
     port = _free_port()
     proc = subprocess.Popen(
-        [sys.executable, "-m", "archeon.cli", "review",
+        [sys.executable, "-m", "archaeon.cli", "review",
          "--claims", str(tmp_path), "--port", str(port)],
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     try:

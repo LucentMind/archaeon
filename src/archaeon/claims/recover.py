@@ -2,7 +2,7 @@ import json
 import re
 from pathlib import Path
 
-from archeon.claims.schema import CLAIM_TYPES, Claim, Evidence
+from archaeon.claims.schema import CLAIM_TYPES, Claim, Evidence
 
 SYNTH_SYSTEM = (
     "You recover what-layer requirement claims from C/C++ source. A what-layer "

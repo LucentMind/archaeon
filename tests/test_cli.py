@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from archeon.cli import main
+from archaeon.cli import main
 
 
 def _git(repo: Path, *args: str) -> None:
@@ -23,7 +23,7 @@ def _setup(tmp_path: Path) -> Path:
     (repo / "src" / "a.c").write_text("int f(void) { return 1; }\n")
     _git(repo, "add", ".")
     _git(repo, "commit", "-m", "EMB-1: add f")
-    config = tmp_path / "archeon.toml"
+    config = tmp_path / "archaeon.toml"
     config.write_text(f"""
 [component]
 name = "demo"
@@ -76,8 +76,8 @@ def test_eval_command(tmp_path):
     assert "precision" in r.output
 
 
-from archeon.claims.pin import pin_claims  # noqa: E402
-from archeon.claims.schema import Claim, Evidence, save_claims  # noqa: E402
+from archaeon.claims.pin import pin_claims  # noqa: E402
+from archaeon.claims.schema import Claim, Evidence, save_claims  # noqa: E402
 
 
 def _setup_repo_with_multiline_file(tmp_path):
@@ -90,7 +90,7 @@ def _setup_repo_with_multiline_file(tmp_path):
         "int f(void) {\n  return 42;\n}\n")
     _git(repo, "add", ".")
     _git(repo, "commit", "-m", "init")
-    config = tmp_path / "archeon.toml"
+    config = tmp_path / "archaeon.toml"
     config.write_text(f"""
 [component]
 name = "demo"
@@ -190,7 +190,7 @@ def test_embed_degrades_when_ollama_down(tmp_path, monkeypatch):
     runner = CliRunner()
     assert runner.invoke(main, ["scan", "--config", str(config)]).exit_code == 0
 
-    import archeon.retrieval.embed as embed_mod
+    import archaeon.retrieval.embed as embed_mod
     import requests as _rq
 
     def boom(texts, model, endpoint, dims):
@@ -207,13 +207,13 @@ def test_cluster_runs_graph_only_without_ollama(tmp_path, monkeypatch):
     runner = CliRunner()
     assert runner.invoke(main, ["scan", "--config", str(config)]).exit_code == 0
 
-    import archeon.retrieval.embed as embed_mod
+    import archaeon.retrieval.embed as embed_mod
     import requests as _rq
     monkeypatch.setattr(embed_mod, "embed_texts",
                         lambda *a, **k: (_ for _ in ()).throw(
                             _rq.RequestException("refused")))
     # cheap-model labelling must not hit the network in the test
-    import archeon.retrieval.cluster as cluster_mod
+    import archaeon.retrieval.cluster as cluster_mod
     monkeypatch.setattr(cluster_mod, "label_cluster", lambda rows, ask: ("", ""))
 
     r = runner.invoke(main, ["cluster", "--config", str(config)])
@@ -226,8 +226,8 @@ def test_synthesize_feature_without_clusters_uses_fallback(tmp_path, monkeypatch
     runner = CliRunner()
     assert runner.invoke(main, ["scan", "--config", str(config)]).exit_code == 0
 
-    import archeon.claims.recover as recover_mod
-    from archeon.claims.schema import Claim
+    import archaeon.claims.recover as recover_mod
+    from archaeon.claims.schema import Claim
 
     captured = {}
 
@@ -267,8 +267,8 @@ def test_synthesize_writes_run_cost_json(tmp_path, monkeypatch):
     scan_r = runner.invoke(main, ["scan", "--config", str(config)])
     assert scan_r.exit_code == 0
 
-    import archeon.claims.recover as recover_mod
-    from archeon.claims.schema import Claim
+    import archaeon.claims.recover as recover_mod
+    from archaeon.claims.schema import Claim
 
     def fake_synth(feature, bundle, ask):
         return [Claim(id="CLM-0001", type="threshold", statement="s",
@@ -317,8 +317,8 @@ def test_synthesize_reports_unknown_route_when_var_set(tmp_path, monkeypatch):
     scan_r = runner.invoke(main, ["scan", "--config", str(config)])
     assert scan_r.exit_code == 0, scan_r.output
 
-    import archeon.claims.recover as recover_mod
-    from archeon.claims.schema import Claim
+    import archaeon.claims.recover as recover_mod
+    from archaeon.claims.schema import Claim
 
     def fake_synth(feature, bundle, ask):
         return [Claim(id="CLM-0001", type="threshold", statement="s",
@@ -351,11 +351,11 @@ def test_cluster_prints_cost_summary(tmp_path, monkeypatch):
 
     import requests as _rq
 
-    import archeon.retrieval.embed as embed_mod
+    import archaeon.retrieval.embed as embed_mod
     monkeypatch.setattr(embed_mod, "embed_texts",
                         lambda *a, **k: (_ for _ in ()).throw(
                             _rq.RequestException("refused")))
-    import archeon.retrieval.cluster as cluster_mod
+    import archaeon.retrieval.cluster as cluster_mod
     monkeypatch.setattr(cluster_mod, "label_cluster",
                         lambda rows, ask: ("", ""))
 
@@ -374,7 +374,7 @@ def test_cluster_prints_cost_summary(tmp_path, monkeypatch):
 
 
 def _fake_query_sequence(result_texts, usd=0.05):
-    """Build a fake ``archeon.llm.query`` that yields one terminal
+    """Build a fake ``archaeon.llm.query`` that yields one terminal
     ResultMessage (subtype "success") per call, carrying the SDK's real
     cost fields, so the real ``AgentClassifier._ask`` runs end to end and
     therefore actually drives ``meter.record`` — unlike the ``label_fn`` /
@@ -423,7 +423,7 @@ def test_synthesize_meter_records_both_stages_via_real_classifier(
     it — the central wiring constraint of this task.
     """
     pytest.importorskip("claude_agent_sdk")
-    import archeon.llm as llm_mod
+    import archaeon.llm as llm_mod
 
     config = _setup(tmp_path)
     runner = CliRunner()
@@ -481,7 +481,7 @@ def test_synthesize_all_clusters_meter_accumulates_across_targets(
     import sqlite3
 
     pytest.importorskip("claude_agent_sdk")
-    import archeon.llm as llm_mod
+    import archaeon.llm as llm_mod
 
     config = _setup(tmp_path)
     runner = CliRunner()
@@ -558,7 +558,7 @@ def test_synthesize_records_an_errored_verify_call(tmp_path, monkeypatch):
     makes the CLI process exit non-zero, and query() surfaces that as an
     exception). That means `AgentClassifier.ask` here does not return
     `""`; it propagates the exception, so this exercises verify_claims's
-    real `except Exception` branch (src/archeon/claims/recover.py:109),
+    real `except Exception` branch (src/archaeon/claims/recover.py:109),
     not its separate unparsable-JSON branch. verify_claims catches it and
     degrades the claim to `contested`, so the run still exits 0 — which is
     exactly why the cost report has to show that call and flag it as
@@ -567,7 +567,7 @@ def test_synthesize_records_an_errored_verify_call(tmp_path, monkeypatch):
     before the exception reaches `ask`'s caller.
     """
     pytest.importorskip("claude_agent_sdk")
-    import archeon.llm as llm_mod
+    import archaeon.llm as llm_mod
 
     config = _setup(tmp_path)
     runner = CliRunner()
@@ -635,14 +635,14 @@ def test_cluster_meter_records_label_call_via_real_classifier(
     invoked once (verified by hand before writing this test).
     """
     pytest.importorskip("claude_agent_sdk")
-    import archeon.llm as llm_mod
+    import archaeon.llm as llm_mod
 
     config = _setup(tmp_path)
     runner = CliRunner()
     scan_r = runner.invoke(main, ["scan", "--config", str(config)])
     assert scan_r.exit_code == 0
 
-    import archeon.retrieval.embed as embed_mod
+    import archaeon.retrieval.embed as embed_mod
     import requests as _rq
     monkeypatch.setattr(embed_mod, "embed_texts",
                         lambda *a, **k: (_ for _ in ()).throw(
@@ -664,13 +664,13 @@ def test_cluster_meter_records_label_call_via_real_classifier(
 
 
 # ---------------------------------------------------------------------------
-# `archeon why` (Task 10)
+# `archaeon why` (Task 10)
 # ---------------------------------------------------------------------------
 
 import yaml  # noqa: E402
 
-from archeon.db import connect  # noqa: E402
-from archeon.retrieval.archaeology import ArtifactRefs  # noqa: E402
+from archaeon.db import connect  # noqa: E402
+from archaeon.retrieval.archaeology import ArtifactRefs  # noqa: E402
 
 
 def _cfg(tmp_path, db_path, repo):
@@ -804,7 +804,7 @@ class _FakeWhyMsg:
 
 
 class _FakeWhyClassifier:
-    """Stands in for archeon.llm.AgentClassifier. Chooses its canned reply
+    """Stands in for archaeon.llm.AgentClassifier. Chooses its canned reply
     from `stage` (why-synth vs why-verify) rather than going through the SDK,
     while still recording into the shared meter so the cost JSON's by_stage
     keys can be checked against the exact hyphenated stage literals the
@@ -863,13 +863,13 @@ def test_why_writes_why_claims_with_hyphenated_stage_labels(
     claims = tmp_path / "claims"
     _claim_file(claims)
 
-    import archeon.claims.why_corpus as why_corpus_mod
+    import archaeon.claims.why_corpus as why_corpus_mod
     monkeypatch.setattr(
         why_corpus_mod, "collect_artifacts",
         lambda conn, repo_path, claims, why_cfg: ArtifactRefs(
             tickets={"EMB-1": {"sha1"}}, prs={}, unknown=set()))
 
-    import archeon.llm as llm_mod
+    import archaeon.llm as llm_mod
     monkeypatch.setattr(llm_mod, "AgentClassifier", _FakeWhyClassifier)
 
     r = CliRunner().invoke(main, [
@@ -883,7 +883,7 @@ def test_why_writes_why_claims_with_hyphenated_stage_labels(
     files = sorted(p.name for p in claims.glob("WHY-*.yaml"))
     assert files == ["WHY-0001.yaml"]
 
-    from archeon.claims.schema import load_claims
+    from archaeon.claims.schema import load_claims
     saved = {c.id: c for c in load_claims(claims)}
     why_claim = saved["WHY-0001"]
     assert why_claim.layer == "why"
@@ -948,14 +948,14 @@ def test_why_only_enriches_machine_verified_what_claims(tmp_path, monkeypatch):
     _claim_file(claims, cid="CLM-0002", feature="nav", status="contested")
 
     seen_ids = []
-    import archeon.claims.why_corpus as why_corpus_mod
+    import archaeon.claims.why_corpus as why_corpus_mod
 
     def fake_collect(conn, repo_path, members, why_cfg):
         seen_ids.extend(c.id for c in members)
         return ArtifactRefs(tickets={"EMB-1": {"sha1"}}, prs={}, unknown=set())
     monkeypatch.setattr(why_corpus_mod, "collect_artifacts", fake_collect)
 
-    import archeon.llm as llm_mod
+    import archaeon.llm as llm_mod
     monkeypatch.setattr(llm_mod, "AgentClassifier", _FakeWhyClassifier)
 
     r = CliRunner().invoke(main, [
@@ -1046,12 +1046,12 @@ def test_why_full_rerun_leaves_no_orphan_why_claims(tmp_path, monkeypatch):
     _claim_file(claims, cid="CLM-0001", feature="nav")
     _claim_file(claims, cid="CLM-0002", feature="checkout")
 
-    import archeon.claims.why_corpus as why_corpus_mod
+    import archaeon.claims.why_corpus as why_corpus_mod
     monkeypatch.setattr(
         why_corpus_mod, "collect_artifacts",
         lambda conn, repo_path, members, why_cfg: ArtifactRefs(
             tickets={"EMB-1": {"sha1"}}, prs={}, unknown=set()))
-    import archeon.llm as llm_mod
+    import archaeon.llm as llm_mod
     monkeypatch.setattr(llm_mod, "AgentClassifier",
                         _DynamicExplainsWhyClassifier)
 
@@ -1092,12 +1092,12 @@ def test_why_two_feature_runs_both_survive_with_distinct_ids(
     _claim_file(claims, cid="CLM-0001", feature="nav")
     _claim_file(claims, cid="CLM-0002", feature="checkout")
 
-    import archeon.claims.why_corpus as why_corpus_mod
+    import archaeon.claims.why_corpus as why_corpus_mod
     monkeypatch.setattr(
         why_corpus_mod, "collect_artifacts",
         lambda conn, repo_path, members, why_cfg: ArtifactRefs(
             tickets={"EMB-1": {"sha1"}}, prs={}, unknown=set()))
-    import archeon.llm as llm_mod
+    import archaeon.llm as llm_mod
     monkeypatch.setattr(llm_mod, "AgentClassifier",
                         _DynamicExplainsWhyClassifier)
 
@@ -1117,7 +1117,7 @@ def test_why_two_feature_runs_both_survive_with_distinct_ids(
     ids = [f.replace(".yaml", "") for f in files]
     assert len(set(ids)) == 2                 # non-colliding ids
 
-    from archeon.claims.schema import load_claims
+    from archaeon.claims.schema import load_claims
     why_claims = {c.id: c for c in load_claims(claims) if c.layer == "why"}
     features = {c.feature for c in why_claims.values()}
     assert features == {"nav", "checkout"}
@@ -1133,7 +1133,7 @@ def test_why_prints_citations_grounded_and_dropped_counts(tmp_path,
     claims = tmp_path / "claims"
     _claim_file(claims, cid="CLM-0001", feature="nav")
 
-    import archeon.claims.why_corpus as why_corpus_mod
+    import archaeon.claims.why_corpus as why_corpus_mod
     monkeypatch.setattr(
         why_corpus_mod, "collect_artifacts",
         lambda conn, repo_path, members, why_cfg: ArtifactRefs(
@@ -1156,7 +1156,7 @@ def test_why_prints_citations_grounded_and_dropped_counts(tmp_path,
             return json.dumps(
                 {"supported": True, "confidence": 0.9, "counter": ""})
 
-    import archeon.llm as llm_mod
+    import archaeon.llm as llm_mod
     monkeypatch.setattr(llm_mod, "AgentClassifier", _MixedGroundingClassifier)
 
     r = CliRunner().invoke(main, [
@@ -1200,13 +1200,13 @@ def test_why_synthesis_failure_for_every_group_preserves_prior_why_claims(
                     status="expert_accepted")
     prior_content = (claims / "WHY-0001.yaml").read_text()
 
-    import archeon.claims.why_corpus as why_corpus_mod
+    import archaeon.claims.why_corpus as why_corpus_mod
     monkeypatch.setattr(
         why_corpus_mod, "collect_artifacts",
         lambda conn, repo_path, members, why_cfg: ArtifactRefs(
             tickets={"EMB-1": {"sha1"}}, prs={}, unknown=set()))
 
-    import archeon.claims.why as why_mod
+    import archaeon.claims.why as why_mod
 
     def _boom(*a, **k):
         raise RuntimeError("backend outage")
@@ -1274,12 +1274,12 @@ def test_why_feature_run_tolerates_non_string_why_claim_id(
         "corroboration": "corroborated", "explains": ["CLM-0002"],
     }, sort_keys=False))
 
-    import archeon.claims.why_corpus as why_corpus_mod
+    import archaeon.claims.why_corpus as why_corpus_mod
     monkeypatch.setattr(
         why_corpus_mod, "collect_artifacts",
         lambda conn, repo_path, members, why_cfg: ArtifactRefs(
             tickets={"EMB-1": {"sha1"}}, prs={}, unknown=set()))
-    import archeon.llm as llm_mod
+    import archaeon.llm as llm_mod
     monkeypatch.setattr(llm_mod, "AgentClassifier", _FakeWhyClassifier)
 
     r = CliRunner().invoke(main, [
@@ -1310,14 +1310,14 @@ def test_why_enriches_expert_accepted_what_claims_too(tmp_path, monkeypatch):
     _claim_file(claims, cid="CLM-0002", feature="nav", status="contested")
 
     seen_ids = []
-    import archeon.claims.why_corpus as why_corpus_mod
+    import archaeon.claims.why_corpus as why_corpus_mod
 
     def fake_collect(conn, repo_path, members, why_cfg):
         seen_ids.extend(c.id for c in members)
         return ArtifactRefs(tickets={"EMB-1": {"sha1"}}, prs={}, unknown=set())
     monkeypatch.setattr(why_corpus_mod, "collect_artifacts", fake_collect)
 
-    import archeon.llm as llm_mod
+    import archaeon.llm as llm_mod
     monkeypatch.setattr(llm_mod, "AgentClassifier", _FakeWhyClassifier)
 
     r = CliRunner().invoke(main, [
@@ -1361,7 +1361,7 @@ def test_why_partial_failure_preserves_only_the_errored_groups_why_claims(
                     status="recovered")
     checkout_prior_content = (claims / "WHY-0001.yaml").read_text()
 
-    import archeon.claims.why_corpus as why_corpus_mod
+    import archaeon.claims.why_corpus as why_corpus_mod
     # Artifacts available for both groups (feature-agnostic), so neither is
     # skipped for having an empty corpus.
     monkeypatch.setattr(
@@ -1374,7 +1374,7 @@ def test_why_partial_failure_preserves_only_the_errored_groups_why_claims(
         "nav". Groups are iterated in `sorted(groups.items())` order (i.e.
         "checkout" before "nav"), and WHY_SYNTH_PROMPT interpolates
         "Feature: {feature}" verbatim (see
-        archeon.claims.why.WHY_SYNTH_PROMPT/_format_what_claims), so
+        archaeon.claims.why.WHY_SYNTH_PROMPT/_format_what_claims), so
         branching on that exact text reliably distinguishes the two
         groups' synthesis calls. The same class is also constructed for
         the why-verify stage, for whichever claims the "nav" group
@@ -1406,7 +1406,7 @@ def test_why_partial_failure_preserves_only_the_errored_groups_why_claims(
             return json.dumps(
                 {"supported": True, "confidence": 0.9, "counter": ""})
 
-    import archeon.llm as llm_mod
+    import archaeon.llm as llm_mod
     monkeypatch.setattr(llm_mod, "AgentClassifier",
                         _PartialFailureWhyClassifier)
 

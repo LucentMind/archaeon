@@ -1,7 +1,7 @@
 import re
 from pathlib import Path
 
-from archeon.codegraph.symsource import symbol_rows
+from archaeon.codegraph.symsource import symbol_rows
 
 _IDENT = re.compile(r"[A-Za-z_]\w*")
 _INCLUDE = re.compile(r'^\s*#\s*include\s*[<"]([^>"]+)[>"]', re.MULTILINE)

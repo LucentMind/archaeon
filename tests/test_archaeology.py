@@ -1,7 +1,7 @@
 import subprocess
 
-from archeon.db import connect
-from archeon.retrieval.archaeology import (
+from archaeon.db import connect
+from archaeon.retrieval.archaeology import (
     ArtifactRefs,
     artifacts_for_commits,
     file_level_commits,

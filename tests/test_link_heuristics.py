@@ -1,5 +1,5 @@
-from archeon.analysis.link_heuristics import extract_heuristic_links
-from archeon.db import connect
+from archaeon.analysis.link_heuristics import extract_heuristic_links
+from archaeon.db import connect
 
 
 def _seed(conn):

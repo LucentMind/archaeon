@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from archeon.codegraph.ts_scan import ts_symbols
+from archaeon.codegraph.ts_scan import ts_symbols
 
 C_SRC = """
 struct motor_state { int temp; };

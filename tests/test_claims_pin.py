@@ -1,7 +1,7 @@
 import subprocess
 
-from archeon.claims.pin import content_hash, normalize, parse_ref, pin_claims, pin_evidence, is_stale, stale_claims
-from archeon.claims.schema import Claim, Evidence
+from archaeon.claims.pin import content_hash, normalize, parse_ref, pin_claims, pin_evidence, is_stale, stale_claims
+from archaeon.claims.schema import Claim, Evidence
 
 
 def _git(repo, *a):

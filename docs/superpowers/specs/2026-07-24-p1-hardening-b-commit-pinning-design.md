@@ -7,7 +7,7 @@ C review UI).
 **Consumed by:** the deferred why-layer (Pass 2) and the phase-2 guardrail, which both need to
 know when a claim's evidence has drifted.
 
-Related: [design spec §6/§10](2026-07-23-archeon-design.md) ·
+Related: [design spec §6/§10](2026-07-23-archaeon-design.md) ·
 [P1 spike exit checklist — known limitation "evidence refs are file:line, not commit-pinned"](../../p1-spike-exit-checklist.md)
 
 ## 1. Problem
@@ -64,7 +64,7 @@ Add optional fields to `Evidence` (all default `None`, so old YAML loads unchang
 - `stale_claims(claims, repo)` — returns the claims with any stale primary evidence.
 
 ### 4.4 CLI — `check-staleness`
-`uv run archeon check-staleness --claims <dir>` prints each claim whose evidence is stale or
+`uv run archaeon check-staleness --claims <dir>` prints each claim whose evidence is stale or
 unpinnable, with the anchored `commit_sha` and the ref, as input to re-verification.
 
 ## 5. Data flow

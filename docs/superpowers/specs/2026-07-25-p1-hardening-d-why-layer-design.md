@@ -50,7 +50,7 @@ The third commit is absent from `commits` (outside ingest scope), which §5 hand
 
 | Decision | Rationale |
 |---|---|
-| Separate `archeon why` stage, not a `synthesize` flag | Matches the one-command-per-stage CLI convention; lets a why-run be re-run or improved without re-paying for expensive what-synthesis; can hard-fail on missing artifacts instead of silently degrading |
+| Separate `archaeon why` stage, not a `synthesize` flag | Matches the one-command-per-stage CLI convention; lets a why-run be re-run or improved without re-paying for expensive what-synthesis; can hard-fail on missing artifacts instead of silently degrading |
 | Cluster-scoped retrieval, claim-attributed output | Overlapping tickets are fetched and paid for once per cluster, while `explains: [CLM-…]` preserves per-claim traceability |
 | Mechanical grounding **then** adversarial verification | The deterministic pass kills fabricated citations for free; letting one model both write and grade a citation lets a plausibly-worded fake survive |
 | `corroboration` as a field orthogonal to `status` | The axes are independent — a code-inferred claim can still be contested or expert-accepted. Collapsing them into `STATUSES` would make those states unrepresentable and would erase, on expert acceptance, the fact that a claim was never corroborated |
@@ -58,7 +58,7 @@ The third commit is absent from `commits` (outside ingest scope), which §5 hand
 
 ## 4. Architecture
 
-`archeon why` reads the what-claims in `claims/*.yaml` and writes why-claims back to the same
+`archaeon why` reads the what-claims in `claims/*.yaml` and writes why-claims back to the same
 directory as `WHY-####.yaml`.
 
 | Unit | Purpose | Depends on |
@@ -249,7 +249,7 @@ code-inferred count so a thin corroborated slice cannot hide behind a large code
 Per the design's §11 ban on blended numbers, no combined what+why figure is printed.
 
 Validation run: ingest artifacts into the scoped DB (it currently has 0 commits/PRs/tickets),
-`archeon why --claims <dir>` (groups are derived from the claims' own `feature` label, so there is
+`archaeon why --claims <dir>` (groups are derived from the claims' own `feature` label, so there is
 no `--all-clusters` flag; `--feature` scopes a run to one label), hand-label into
 `why_labels.csv` (`claim_id,correct`), then
 `claims-eval`. No `claims-eval` invocation change is needed: `evaluate_claims` skips unlabeled

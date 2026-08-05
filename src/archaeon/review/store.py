@@ -3,7 +3,7 @@ from pathlib import Path
 
 import yaml
 
-from archeon.claims.schema import claim_version
+from archaeon.claims.schema import claim_version
 
 _BUCKET = {
     "machine_verified": "verified",

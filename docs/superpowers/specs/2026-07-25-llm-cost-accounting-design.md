@@ -4,7 +4,7 @@
 **Status:** design (approved for planning)
 **Related:**
 scoped 4b re-run *(internal validation run — not in this repo)* ·
-[archeon design](2026-07-23-archeon-design.md)
+[archaeon design](2026-07-23-archaeon-design.md)
 
 ## Goal
 
@@ -13,7 +13,7 @@ current after-the-fact token heuristics. The Claude Agent SDK already returns
 the real per-call cost on its terminal `ResultMessage`
 (`total_cost_usd`, `usage`, `model_usage`) — the code just discards it today,
 reading only `.result`
-([`src/archeon/llm.py:59-61`](../../../src/archeon/llm.py)). Capture it,
+([`src/archaeon/llm.py:59-61`](../../../src/archaeon/llm.py)). Capture it,
 aggregate per command run, print a summary, and drop a machine-readable
 `run_cost.json` beside the synthesized claims.
 
@@ -36,7 +36,7 @@ This project authenticates through the Claude CLI's own subscription/OAuth
 login, not an API key — `AgentClassifier` deliberately strips
 `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` so the spawned CLI uses
 subscription auth
-([`_cli_auth_env`, llm.py:20-26](../../../src/archeon/llm.py)). Therefore the
+([`_cli_auth_env`, llm.py:20-26](../../../src/archaeon/llm.py)). Therefore the
 SDK's `total_cost_usd` is normally the **API-equivalent** cost — what the run
 *would* cost billed to an API key — not an amount actually charged. Every
 surface (the printed summary and the JSON) must label it as such, e.g.
@@ -62,13 +62,13 @@ cost record of an otherwise successful run.
 
 ## Components
 
-### 1. `CostMeter` + extraction helper — new `src/archeon/cost.py`
+### 1. `CostMeter` + extraction helper — new `src/archaeon/cost.py`
 
 A dependency-free accumulator, no SDK import (it only reads duck-typed fields
 off whatever message object it is handed), so it is unit-testable in isolation.
 
 **The module itself is the source of truth:**
-[`src/archeon/cost.py`](../../../src/archeon/cost.py). This spec deliberately
+[`src/archaeon/cost.py`](../../../src/archaeon/cost.py). This spec deliberately
 does not reproduce it — an inlined copy of a live module drifts, and did.
 What follows is the contract `tests/test_cost.py` pins.
 
@@ -157,7 +157,7 @@ already ran. `meter=None` ⇒ no recording, no behavior change — so `link_llm`
 and any other `AgentClassifier` caller are untouched.
 
 Why this matters: `verify_claims`
-([`claims/recover.py`](../../../src/archeon/claims/recover.py)) catches
+([`claims/recover.py`](../../../src/archaeon/claims/recover.py)) catches
 `Exception` per claim and degrades the claim to `contested`, so an overloaded
 or turn-exhausted call leaves the run exiting 0. Without recording errored
 terminals, a long `--all-clusters` run can burn quota that never appears in
@@ -168,7 +168,7 @@ any report.
 **`cli_synthesize`** — one meter shared across every LLM call in the run:
 
 ```python
-from archeon.cost import CostMeter
+from archaeon.cost import CostMeter
 meter = CostMeter()
 ...
 for label, cid in targets:
@@ -305,7 +305,7 @@ agrees).
 - `synthesize` CLI test with `synthesize_claims`/`verify_claims` stubbed (no
   real LLM): asserts `<out_dir>/run_cost.json` exists and parses with the
   expected top-level keys.
-- `synthesize` with `archeon.llm.query` faked to yield a successful synth
+- `synthesize` with `archaeon.llm.query` faked to yield a successful synth
   result then an errored verify terminal: the run still exits 0 with the claim
   `contested`, and `run_cost.json` shows both calls, `failed_calls == 1`, and
   the errored call's dollars under `by_stage.verify`.
@@ -315,7 +315,7 @@ agrees).
   absent from `tmp_path` would be vacuously true.
 
 **No test may make a real LLM call**: any path that reaches
-`AgentClassifier.ask` monkeypatches `archeon.llm.query` first.
+`AgentClassifier.ask` monkeypatches `archaeon.llm.query` first.
 
 ## Rollout order
 

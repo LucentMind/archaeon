@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from archeon.codegraph.clang_scan import clang_symbols
+from archaeon.codegraph.clang_scan import clang_symbols
 
 C_SRC = "int enter_state(int s) { return s; }\n"
 

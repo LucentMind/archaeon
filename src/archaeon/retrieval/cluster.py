@@ -4,10 +4,10 @@ import networkx as nx
 import numpy as np
 from networkx.algorithms.community import greedy_modularity_communities
 
-from archeon.claims.recover import _strip_fence
-from archeon.claims.schema import CLAIM_TYPES
-from archeon.codegraph.symsource import symbol_rows
-from archeon.retrieval.embed import load_vectors
+from archaeon.claims.recover import _strip_fence
+from archaeon.claims.schema import CLAIM_TYPES
+from archaeon.codegraph.symsource import symbol_rows
+from archaeon.retrieval.embed import load_vectors
 
 LABEL_SYSTEM = (
     "You name a cluster of related C/C++ symbols as a short feature area and "

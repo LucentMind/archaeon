@@ -4,7 +4,7 @@ import pytest
 
 pytest.importorskip("claude_agent_sdk")
 
-from archeon import llm  # noqa: E402
+from archaeon import llm  # noqa: E402
 
 
 class _FakeResult:
@@ -98,7 +98,7 @@ def test_ask_without_a_meter_is_unchanged(monkeypatch):
 
 
 def test_ask_records_one_call_into_the_meter(monkeypatch):
-    from archeon.cost import CostMeter
+    from archaeon.cost import CostMeter
 
     monkeypatch.setattr(llm, "query",
                         _fake_query_factory([_FakeCostedResult("YES")]))
@@ -118,7 +118,7 @@ def test_ask_records_one_call_into_the_meter(monkeypatch):
 
 
 def test_meter_untouched_when_no_success_message(monkeypatch):
-    from archeon.cost import CostMeter
+    from archaeon.cost import CostMeter
 
     monkeypatch.setattr(llm, "query", _fake_query_factory([_FakeNonResult()]))
     meter = CostMeter()
@@ -150,7 +150,7 @@ def test_errored_terminal_call_is_recorded(monkeypatch, subtype):
     """verify_claims swallows per-claim exceptions, so an overloaded or
     turn-exhausted call otherwise burns quota completely invisibly.
     """
-    from archeon.cost import CostMeter
+    from archaeon.cost import CostMeter
 
     monkeypatch.setattr(llm, "query", _fake_query_factory(
         [_FakeErroredResult(subtype)]))
@@ -175,7 +175,7 @@ def test_errored_call_without_a_meter_is_still_a_noop(monkeypatch):
 
 
 def test_success_after_error_still_yields_the_result(monkeypatch):
-    from archeon.cost import CostMeter
+    from archaeon.cost import CostMeter
 
     monkeypatch.setattr(llm, "query", _fake_query_factory(
         [_FakeErroredResult("error_during_execution"),

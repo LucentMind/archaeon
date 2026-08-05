@@ -1,6 +1,6 @@
 import numpy as np
 
-from archeon.retrieval import bundle as bundle_mod
+from archaeon.retrieval import bundle as bundle_mod
 
 
 def _sym(i, name, line, nlines):
@@ -48,9 +48,9 @@ def test_rank_returns_input_order_without_centroid():
 
 
 def test_bundle_for_cluster_filters_members_and_packs(tmp_path):
-    from archeon.db import connect
-    from archeon import config as config_mod
-    from archeon.retrieval.bundle import bundle_for_cluster
+    from archaeon.db import connect
+    from archaeon import config as config_mod
+    from archaeon.retrieval.bundle import bundle_for_cluster
 
     (tmp_path / "src").mkdir()
     (tmp_path / "src" / "a.c").write_text(
@@ -92,9 +92,9 @@ def test_bundle_for_cluster_filters_members_and_packs(tmp_path):
 
 
 def test_bundle_for_prefix_bounds_to_prefix_not_cluster(tmp_path):
-    from archeon.db import connect
-    from archeon import config as config_mod
-    from archeon.retrieval.bundle import bundle_for_prefix
+    from archaeon.db import connect
+    from archaeon import config as config_mod
+    from archaeon.retrieval.bundle import bundle_for_prefix
 
     (tmp_path / "nav").mkdir()
     (tmp_path / "vendor").mkdir()

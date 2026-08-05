@@ -24,8 +24,8 @@
 
 **Files:**
 - Modify: `pyproject.toml` (bump `requires-python`)
-- Modify: `src/archeon/codegraph/scan.py` (add `_keep`, extend `scan_component` signature + walk loop)
-- Modify: `src/archeon/cli.py:117-119` (pass filters from config)
+- Modify: `src/archaeon/codegraph/scan.py` (add `_keep`, extend `scan_component` signature + walk loop)
+- Modify: `src/archaeon/cli.py:117-119` (pass filters from config)
 - Test: `tests/test_scan_filters.py` (new)
 
 **Interfaces:**
@@ -37,8 +37,8 @@
 Create `tests/test_scan_filters.py`:
 
 ```python
-from archeon.codegraph.scan import scan_component, _keep
-from archeon.db import connect
+from archaeon.codegraph.scan import scan_component, _keep
+from archaeon.db import connect
 
 FN = "int {name}_fn(void) {{ return 1; }}\n"
 
@@ -112,7 +112,7 @@ Expected: FAIL — `ImportError: cannot import name '_keep'` (and `scan_componen
 
 - [ ] **Step 3: Implement `_keep` and thread filters through `scan_component`**
 
-In `src/archeon/codegraph/scan.py`, add the import and helper near the top (after existing imports):
+In `src/archaeon/codegraph/scan.py`, add the import and helper near the top (after existing imports):
 
 ```python
 from pathlib import PurePosixPath
@@ -166,7 +166,7 @@ Inside the walk loop, after computing `rel` and before any insert, skip filtered
 
 - [ ] **Step 4: Wire filters from the CLI**
 
-In `src/archeon/cli.py`, change the `cli_scan` body (lines 115-119) to pass the optional filters:
+In `src/archaeon/cli.py`, change the `cli_scan` body (lines 115-119) to pass the optional filters:
 
 ```python
     cfg, conn = _load(config_path)
@@ -194,7 +194,7 @@ Expected: PASS (new filter tests + existing scan tests all green — confirms ba
 - [ ] **Step 7: Commit**
 
 ```bash
-git add pyproject.toml src/archeon/codegraph/scan.py src/archeon/cli.py tests/test_scan_filters.py
+git add pyproject.toml src/archaeon/codegraph/scan.py src/archaeon/cli.py tests/test_scan_filters.py
 git commit -m "feat(scan): include/exclude glob filters for scan scoping
 
 Adds optional [component] include/exclude glob lists, matched via
@@ -210,7 +210,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ### Task 2: Apply the exclude glob to the scoped config
 
 **Files:**
-- Modify: `archeon.example.scoped.toml` (add `exclude`, rewrite caveat header)
+- Modify: `archaeon.example.scoped.toml` (add `exclude`, rewrite caveat header)
 - Test: `tests/test_scoped_config_loads.py` (new)
 
 **Interfaces:**
@@ -223,11 +223,11 @@ Create `tests/test_scoped_config_loads.py`:
 ```python
 from pathlib import Path
 
-from archeon import config as config_mod
+from archaeon import config as config_mod
 
 
 def test_scoped_config_loads_with_exclude():
-    cfg = config_mod.load(Path("archeon.example.scoped.toml"))
+    cfg = config_mod.load(Path("archaeon.example.scoped.toml"))
     excl = cfg["component"].get("exclude")
     assert excl is not None
     assert "**/generated/**/*.cpp" in excl
@@ -240,7 +240,7 @@ Expected: FAIL — `assert None is not None` (no `exclude` key yet).
 
 - [ ] **Step 3: Add the exclude glob and rewrite the caveat**
 
-In `archeon.example.scoped.toml`, add inside the `[component]` block, immediately after the `path_prefixes = [ ... ]` list closes:
+In `archaeon.example.scoped.toml`, add inside the `[component]` block, immediately after the `path_prefixes = [ ... ]` list closes:
 
 ```toml
 # Glob exclude (scan include/exclude filters, py>=3.13). Drops the ~267
@@ -269,7 +269,7 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add archeon.example.scoped.toml tests/test_scoped_config_loads.py
+git add archaeon.example.scoped.toml tests/test_scoped_config_loads.py
 git commit -m "config(motor-ctrl): exclude glob drops generated .cpp converters
 
 Uses the new scan exclude filter to remove the ~267 mechanical converter
@@ -283,8 +283,8 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ### Task 3: `bundle_for_prefix` + `--feature` prefix-bounding
 
 **Files:**
-- Modify: `src/archeon/retrieval/bundle.py` (add `bundle_for_prefix`)
-- Modify: `src/archeon/cli.py:242-265` (rewrite `--feature` branch)
+- Modify: `src/archaeon/retrieval/bundle.py` (add `bundle_for_prefix`)
+- Modify: `src/archaeon/cli.py:242-265` (rewrite `--feature` branch)
 - Test: `tests/test_bundle.py` (add `bundle_for_prefix` test)
 
 **Interfaces:**
@@ -297,9 +297,9 @@ Add to `tests/test_bundle.py`:
 
 ```python
 def test_bundle_for_prefix_bounds_to_prefix_not_cluster(tmp_path):
-    from archeon.db import connect
-    from archeon import config as config_mod
-    from archeon.retrieval.bundle import bundle_for_prefix
+    from archaeon.db import connect
+    from archaeon import config as config_mod
+    from archaeon.retrieval.bundle import bundle_for_prefix
 
     (tmp_path / "nav").mkdir()
     (tmp_path / "vendor").mkdir()
@@ -347,7 +347,7 @@ Expected: FAIL — `ImportError: cannot import name 'bundle_for_prefix'`.
 
 - [ ] **Step 3: Implement `bundle_for_prefix`**
 
-Add to `src/archeon/retrieval/bundle.py` (after `bundle_for_cluster`):
+Add to `src/archaeon/retrieval/bundle.py` (after `bundle_for_cluster`):
 
 ```python
 def bundle_for_prefix(conn, repo_path, prefix, retr):
@@ -373,10 +373,10 @@ Expected: PASS (new test + all existing bundle tests green).
 
 - [ ] **Step 5: Rewrite the `--feature` branch in the CLI**
 
-In `src/archeon/cli.py`, update the import line (currently line 216-217) to include the new helper:
+In `src/archaeon/cli.py`, update the import line (currently line 216-217) to include the new helper:
 
 ```python
-    from archeon.retrieval.bundle import (
+    from archaeon.retrieval.bundle import (
         bundle_for_cluster, bundle_for_prefix, pack_symbols, rank_symbols)
 ```
 
@@ -410,7 +410,7 @@ Expected: PASS. If a synthesize CLI test asserted the old overlap-cluster behavi
 - [ ] **Step 7: Commit**
 
 ```bash
-git add src/archeon/retrieval/bundle.py src/archeon/cli.py tests/test_bundle.py
+git add src/archaeon/retrieval/bundle.py src/archaeon/cli.py tests/test_bundle.py
 git commit -m "fix(synthesize): --feature bounds bundle to the prefix
 
 Replaces 'bundle every overlapping cluster whole' (which ballooned
@@ -442,9 +442,9 @@ Expected: `qwen3-embedding:4b` present. If only `0.6b` is present, run `ollama p
 Run each and capture symbol/cluster counts:
 
 ```bash
-.venv/bin/archeon scan --config archeon.example.scoped.toml
-.venv/bin/archeon embed --config archeon.example.scoped.toml
-.venv/bin/archeon cluster --config archeon.example.scoped.toml
+.venv/bin/archaeon scan --config archaeon.example.scoped.toml
+.venv/bin/archaeon embed --config archaeon.example.scoped.toml
+.venv/bin/archaeon cluster --config archaeon.example.scoped.toml
 ```
 
 Expected signals: symbol count near ~5.7k (the ~267 generated `.cpp` now excluded vs the earlier ~6,003), and clusters that are **not** 3 mega-clusters holding ~99% of symbols.
@@ -454,7 +454,7 @@ Expected signals: symbol count near ~5.7k (the ~267 generated `.cpp` now exclude
 Run (use the navigator prefix under the scoped modules, e.g. `projects/motor-ctrl/modules/motor/src/controller/`):
 
 ```bash
-.venv/bin/archeon synthesize --config archeon.example.scoped.toml \
+.venv/bin/archaeon synthesize --config archaeon.example.scoped.toml \
   --feature projects/motor-ctrl/modules/motor/src/controller/ \
   --out claims_scoped
 ```
@@ -464,7 +464,7 @@ Expected: the bundle is bounded to the navigator prefix's symbols (no vendored/g
 - [ ] **Step 4: Baseline staleness (0-stale) then a live stale catch**
 
 ```bash
-.venv/bin/archeon check-staleness --config archeon.example.scoped.toml --claims claims_scoped
+.venv/bin/archaeon check-staleness --config archaeon.example.scoped.toml --claims claims_scoped
 ```
 
 Then edit one pinned source line in the real checkout (a line cited by a synthesized claim), re-run `check-staleness`, and confirm it flags exactly the affected claim(s) as stale. **Revert the edit afterward** (`git -C /work/monorepo checkout -- <file>`).

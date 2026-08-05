@@ -1,4 +1,4 @@
-# Archeon P0 — Exit Checklist (Runbook)
+# Archaeon P0 — Exit Checklist (Runbook)
 
 The goal of this checklist is to produce **one number**: the *precision* of recovered
 issue↔commit links on a golden component. That number gates P1 — if the recovered evidence
@@ -10,7 +10,7 @@ the exact trust-killer the design guards against.
 - Recall is reported but **not** gated: missing links are a growth path; wrong links poison
   everything downstream.
 
-Related docs: [design spec](superpowers/specs/2026-07-23-archeon-design.md) ·
+Related docs: [design spec](superpowers/specs/2026-07-23-archaeon-design.md) ·
 [P0 plan](superpowers/plans/2026-07-23-p0-evidence-lake.md) ·
 [market research](research/2026-07-23-market-research.md)
 
@@ -30,10 +30,10 @@ You need that expert (possibly yourself) for Step 6 — the only labor-intensive
 Copy the example and edit it for your component:
 
 ```bash
-cp archeon.example.toml archeon.toml
+cp archaeon.example.toml archaeon.toml
 ```
 
-Edit `archeon.toml` to point at your real paths and project:
+Edit `archaeon.toml` to point at your real paths and project:
 
 ```toml
 [component]
@@ -72,11 +72,11 @@ Jira Cloud API tokens (the kind you generate at id.atlassian.com) authenticate
 via HTTP Basic auth as `(email, token)` — set both:
 
 ```bash
-export ARCHEON_JIRA_TOKEN=...
-export ARCHEON_JIRA_EMAIL=...     # the Atlassian account the token belongs to
+export ARCHAEON_JIRA_TOKEN=...
+export ARCHAEON_JIRA_EMAIL=...     # the Atlassian account the token belongs to
 ```
 
-Omitting `ARCHEON_JIRA_EMAIL` falls back to a bare `Authorization: Bearer`
+Omitting `ARCHAEON_JIRA_EMAIL` falls back to a bare `Authorization: Bearer`
 header, which Jira Cloud rejects with a 403 (not a 401 — it doesn't look like
 an auth problem at first glance). Only omit it for a Jira Data Center/Server
 setup that genuinely authenticates via bearer/OAuth token.
@@ -104,7 +104,7 @@ export CLAUDE_CODE_OAUTH_TOKEN=$(claude setup-token)
 
 Note: `link-llm` intentionally hides `ANTHROPIC_API_KEY` from the SDK, so
 having that variable set will **not** switch it to API billing — it always
-uses the CLI login. On PowerShell use `$env:ARCHEON_JIRA_TOKEN = "..."` etc.
+uses the CLI login. On PowerShell use `$env:ARCHAEON_JIRA_TOKEN = "..."` etc.
 
 ## Step 3 — Ingest the artifacts
 
@@ -113,21 +113,21 @@ PRs are discovered from the component's commits, and Jira tickets are fetched by
 found in those commits and PRs, so git must run first, then PRs, then Jira.
 
 ```bash
-uv run archeon ingest-git
+uv run archaeon ingest-git
 ```
 
 git is scoped to the component's `path_prefixes` and excludes bot commits (Dependabot/Renovate/
 CI) by default.
 
 ```bash
-uv run archeon ingest-prs
+uv run archaeon ingest-prs
 ```
 
 Fetches only the PRs that contain the component's commits (via `commits/{sha}/pulls`) — it does
 not enumerate every PR in the monorepo.
 
 ```bash
-uv run archeon ingest-jira
+uv run archaeon ingest-jira
 ```
 
 Discovers the ticket keys referenced by those commits/PRs/branches and fetches **only** those
@@ -135,21 +135,21 @@ tickets — so the 11 contributing Jira projects never get bulk-pulled. It print
 it discovered.
 
 Confluence is optional and not needed for the code-first / link-recovery numbers this checklist
-produces; skip it, or run `uv run archeon ingest-wiki` against a local HTML export if you have
+produces; skip it, or run `uv run archaeon ingest-wiki` against a local HTML export if you have
 one.
 
 ## Step 4 — Build the code graph, coupling, and heuristic links
 
 ```bash
-uv run archeon scan
+uv run archaeon scan
 ```
 
 ```bash
-uv run archeon coupling
+uv run archaeon coupling
 ```
 
 ```bash
-uv run archeon link
+uv run archaeon link
 ```
 
 - `scan` prints clang vs tree-sitter file counts and a **gap count** (files it couldn't parse)
@@ -164,7 +164,7 @@ uv run archeon link
 ## Step 5 — Sanity-check what landed
 
 ```bash
-uv run archeon stats
+uv run archaeon stats
 ```
 
 Expect non-zero `commits`, `tickets`, `prs`, `symbols`, and `links`, plus the top
@@ -194,7 +194,7 @@ def456...,
 Rules:
 
 - For each sha, you (or the expert) decide the correct ticket from the commit and the tracker
-  — **not** from what Archeon guessed (that would bias the measurement).
+  — **not** from what Archaeon guessed (that would bias the measurement).
 - An **empty `ticket_key` means "this commit legitimately has no ticket."** Keep those rows —
   they are what make precision meaningful. Expect roughly half your commits to have no ticket;
   that is normal.
@@ -205,24 +205,24 @@ Rules:
 Commit-message keys only (the low-coverage baseline):
 
 ```bash
-uv run archeon eval --gold gold.csv --method key_regex
+uv run archaeon eval --gold gold.csv --method key_regex
 ```
 
 Add PR-level inheritance (PR title/body/branch ticket propagated to member commits) — this is
 the large lift:
 
 ```bash
-uv run archeon eval --gold gold.csv --method key_regex --method pr_inherited
+uv run archaeon eval --gold gold.csv --method key_regex --method pr_inherited
 ```
 
 Optionally add the LLM tail (commits with no key that no PR covered):
 
 ```bash
-uv run archeon link-llm
+uv run archaeon link-llm
 ```
 
 ```bash
-uv run archeon eval --gold gold.csv
+uv run archaeon eval --gold gold.csv
 ```
 
 Each `eval` prints `precision`, `recall`, `predicted`, and `gold`. (`branch_regex` is a
@@ -231,9 +231,9 @@ as its own commit→ticket arm.)
 
 ## Step 8 — Read the number and make the call
 
-- **Precision** = of the links Archeon asserted, the fraction that were correct.
+- **Precision** = of the links Archaeon asserted, the fraction that were correct.
   **This is the gate: ≥ 0.80.**
-- **Recall** = of the true links, the fraction Archeon found. Report it; it does **not** gate.
+- **Recall** = of the true links, the fraction Archaeon found. Report it; it does **not** gate.
 
 Expect the jump between the first two arms to be large (commit-message keys reach only the
 commits that name a ticket; PR inheritance reaches whole PRs). If the LLM arm barely moves

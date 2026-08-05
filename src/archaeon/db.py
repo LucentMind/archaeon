@@ -8,7 +8,7 @@ def connect(path: str | Path) -> sqlite3.Connection:
     conn = sqlite3.connect(str(path))
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
-    schema = resources.files("archeon").joinpath("schema.sql").read_text()
+    schema = resources.files("archaeon").joinpath("schema.sql").read_text()
     conn.executescript(schema)
     conn.commit()
     return conn

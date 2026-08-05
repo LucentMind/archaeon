@@ -1,7 +1,7 @@
-from archeon.analysis.link_heuristics import discover_ticket_keys
-from archeon.connectors.jira_connector import (
+from archaeon.analysis.link_heuristics import discover_ticket_keys
+from archaeon.connectors.jira_connector import (
     _default_fetch, _normalize_ts, ingest_jira, ingest_jira_by_keys)
-from archeon.db import connect
+from archaeon.db import connect
 
 # Atlassian's `/rest/api/2/search/jql` endpoint pages via a cursor
 # (`nextPageToken`/`isLast`), not the retired `startAt`/`total` offset scheme.
@@ -96,7 +96,7 @@ def test_default_fetch_uses_basic_auth_when_email_given(monkeypatch):
         return FakeResp()
 
     monkeypatch.setattr(
-        "archeon.connectors.jira_connector.requests.get", fake_get)
+        "archaeon.connectors.jira_connector.requests.get", fake_get)
     _default_fetch("https://jira.example/rest/api/2/search", {}, "tkn",
                    email="dev@example.com")
     assert calls["kwargs"]["auth"] == ("dev@example.com", "tkn")
@@ -118,7 +118,7 @@ def test_default_fetch_falls_back_to_bearer_without_email(monkeypatch):
         return FakeResp()
 
     monkeypatch.setattr(
-        "archeon.connectors.jira_connector.requests.get", fake_get)
+        "archaeon.connectors.jira_connector.requests.get", fake_get)
     _default_fetch("https://jira.example/rest/api/2/search", {}, "tkn")
     assert calls["kwargs"]["headers"] == {"Authorization": "Bearer tkn"}
     assert "auth" not in calls["kwargs"]
@@ -127,7 +127,7 @@ def test_default_fetch_falls_back_to_bearer_without_email(monkeypatch):
 def test_search_stops_on_missing_next_token_even_if_not_marked_last(tmp_path):
     # Defensive: don't loop forever if a response claims more pages exist
     # but doesn't actually provide a token to fetch them with.
-    from archeon.connectors.jira_connector import _search
+    from archaeon.connectors.jira_connector import _search
 
     calls = []
 

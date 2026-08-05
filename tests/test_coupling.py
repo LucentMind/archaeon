@@ -1,5 +1,5 @@
-from archeon.analysis.coupling import compute_coupling, strongest_pairs
-from archeon.db import connect
+from archaeon.analysis.coupling import compute_coupling, strongest_pairs
+from archaeon.db import connect
 
 
 def _seed(conn):

@@ -1,5 +1,5 @@
-from archeon.codegraph.edges import extract_edges
-from archeon.db import connect
+from archaeon.codegraph.edges import extract_edges
+from archaeon.db import connect
 
 
 def _insert(conn, name, path, line, end_line):

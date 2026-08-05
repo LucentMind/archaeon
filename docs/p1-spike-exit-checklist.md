@@ -1,6 +1,6 @@
 # P1 What-Layer Spike — Exit Checklist (Runbook)
 
-This validates the product's **core bet**: can Archeon extract *correct* what-layer claims —
+This validates the product's **core bet**: can Archaeon extract *correct* what-layer claims —
 behavior, structure, and constraint values — directly from C/C++ code? The what-layer stands on
 code alone, so this needs no artifact links and no P0 exit numbers; only that `scan` has run.
 
@@ -10,7 +10,7 @@ code alone, so this needs no artifact links and no P0 exit numbers; only that `s
 - Recall is reported (informally, against a small sealed set) but **not** gated — missing claims
   are a growth path; wrong claims are the killer.
 
-Related: [design spec §5/§6/§11](superpowers/specs/2026-07-23-archeon-design.md) ·
+Related: [design spec §5/§6/§11](superpowers/specs/2026-07-23-archaeon-design.md) ·
 [P0 exit checklist](p0-exit-checklist.md)
 
 ---
@@ -21,7 +21,7 @@ Related: [design spec §5/§6/§11](superpowers/specs/2026-07-23-archeon-design.
   is populated — `synthesize` reads it to find the feature's files).
 - Claude CLI auth set up (`claude login`, or `CLAUDE_CODE_OAUTH_TOKEN` from `claude setup-token`)
   — `synthesize` uses the Claude Agent SDK, same as `link-llm`.
-- A stronger synthesis model is recommended: set `[llm] expensive_model` in `archeon.toml`
+- A stronger synthesis model is recommended: set `[llm] expensive_model` in `archaeon.toml`
   (e.g. a Sonnet/Opus-class model); it falls back to `cheap_model` if unset.
 
 ## Step 0 — Pick a feature area and an expert
@@ -43,7 +43,7 @@ still get the precision gate from Step 4; you just won't have a recall number.
 ## Step 2 — Synthesize and verify
 
 ```bash
-uv run archeon synthesize --feature src/motor_ctrl/thermal/ --out claims
+uv run archaeon synthesize --feature src/motor_ctrl/thermal/ --out claims
 ```
 
 `--feature` is a path prefix (matched against the parsed file paths in `symbols`). This
@@ -89,7 +89,7 @@ stated) or `no` (wrong, overstated, or misattributed).
 ## Step 5 — Run the eval
 
 ```bash
-uv run archeon claims-eval --claims claims --labels claim_labels.csv
+uv run archaeon claims-eval --claims claims --labels claim_labels.csv
 ```
 
 It prints two numbers per layer, each against its own gate:

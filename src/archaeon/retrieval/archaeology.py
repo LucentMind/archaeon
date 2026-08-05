@@ -12,7 +12,7 @@ from pathlib import Path
 # Reuses the git connector's runner: it deliberately does not raise on a
 # non-zero exit, so a missing path or bad rev degrades to [] here instead
 # of aborting a whole why-run.
-from archeon.connectors.git_connector import _run as git_run
+from archaeon.connectors.git_connector import _run as git_run
 
 
 def _shas(result, max_commits: int) -> list[str]:

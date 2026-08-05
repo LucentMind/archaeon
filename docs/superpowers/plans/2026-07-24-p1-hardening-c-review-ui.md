@@ -30,21 +30,21 @@
 ## File Structure
 
 **New files**
-- `src/archeon/review/__init__.py` — new package marker (Task 2).
-- `src/archeon/review/store.py` — claim loading, verification buckets, card shaping, component/cluster grouping (with cluster-join + flat fallback), and the impact×uncertainty queue (Tasks 2–4).
-- `src/archeon/review/render.py` — per-claim-type visual-grammar render-specs with prose fallback (Task 5).
-- `src/archeon/review/server.py` — FastAPI app factory, JSON API routes, POST writer, static mount (Task 6).
-- `src/archeon/review/static/index.html`, `app.js`, `style.css` — frontend bundle (Task 8).
+- `src/archaeon/review/__init__.py` — new package marker (Task 2).
+- `src/archaeon/review/store.py` — claim loading, verification buckets, card shaping, component/cluster grouping (with cluster-join + flat fallback), and the impact×uncertainty queue (Tasks 2–4).
+- `src/archaeon/review/render.py` — per-claim-type visual-grammar render-specs with prose fallback (Task 5).
+- `src/archaeon/review/server.py` — FastAPI app factory, JSON API routes, POST writer, static mount (Task 6).
+- `src/archaeon/review/static/index.html`, `app.js`, `style.css` — frontend bundle (Task 8).
 - Tests: `tests/test_save_claim.py`, `tests/test_review_store.py`, `tests/test_review_queue.py`, `tests/test_render_spec.py`, `tests/test_review_server.py`, `tests/test_cli_review.py`, `tests/test_review_smoke.py`.
 
 **Modified files**
-- `src/archeon/claims/schema.py` — add `STATUSES`, `StaleClaimError`, `claim_path`, `claim_version`, `save_claim` (Task 1). Existing `Claim`, `save_claims`, `load_claims` are untouched.
+- `src/archaeon/claims/schema.py` — add `STATUSES`, `StaleClaimError`, `claim_path`, `claim_version`, `save_claim` (Task 1). Existing `Claim`, `save_claims`, `load_claims` are untouched.
 - `pyproject.toml` — add `fastapi`, `uvicorn` to dependencies; `playwright` to the dev group (Tasks 1 and 8).
-- `src/archeon/cli.py` — new `review` command (Task 7).
+- `src/archaeon/cli.py` — new `review` command (Task 7).
 
 **Unchanged (do not touch the logic)**
-- `src/archeon/claims/recover.py`, `src/archeon/claims/claim_eval.py` — synthesis, verification, and the CSV precision harness stay exactly as-is (spec §7).
-- `src/archeon/schema.sql` — no schema changes in this track; the DB is read-only here.
+- `src/archaeon/claims/recover.py`, `src/archaeon/claims/claim_eval.py` — synthesis, verification, and the CSV precision harness stay exactly as-is (spec §7).
+- `src/archaeon/schema.sql` — no schema changes in this track; the DB is read-only here.
 
 ---
 
@@ -53,7 +53,7 @@
 Extends the claim schema module with the review terminal states and the one write path the API uses. The write mutates the raw YAML mapping (not the `Claim` dataclass) so unknown keys survive and diffs stay minimal.
 
 **Files:**
-- Modify: `src/archeon/claims/schema.py`
+- Modify: `src/archaeon/claims/schema.py`
 - Modify: `pyproject.toml:6-15` (dependencies)
 - Test: `tests/test_save_claim.py`
 
@@ -98,7 +98,7 @@ Create `tests/test_save_claim.py`:
 import pytest
 import yaml
 
-from archeon.claims import schema
+from archaeon.claims import schema
 
 
 def _write(claims_dir, claim_id, extra=None):
@@ -182,11 +182,11 @@ def test_save_claim_without_expected_version_skips_check(tmp_path):
 - [ ] **Step 4: Run it to verify it fails**
 
 Run: `uv run pytest tests/test_save_claim.py -v`
-Expected: FAIL with `AttributeError: module 'archeon.claims.schema' has no attribute 'save_claim'`.
+Expected: FAIL with `AttributeError: module 'archaeon.claims.schema' has no attribute 'save_claim'`.
 
 - [ ] **Step 5: Implement the writer**
 
-Edit `src/archeon/claims/schema.py`. Add `import hashlib` at the top (below the existing `from dataclasses import ...`), and append after `load_claims`:
+Edit `src/archaeon/claims/schema.py`. Add `import hashlib` at the top (below the existing `from dataclasses import ...`), and append after `load_claims`:
 
 ```python
 STATUSES = {
@@ -248,7 +248,7 @@ Expected: all pre-existing tests still pass (the additions are new symbols; `Cla
 - [ ] **Step 8: Commit**
 
 ```bash
-git add pyproject.toml uv.lock src/archeon/claims/schema.py tests/test_save_claim.py
+git add pyproject.toml uv.lock src/archaeon/claims/schema.py tests/test_save_claim.py
 git commit -m "feat(claims): review status enum + minimal-diff save_claim with version token"
 ```
 
@@ -259,8 +259,8 @@ git commit -m "feat(claims): review status enum + minimal-diff save_claim with v
 The store's low-level layer: read a claims directory into good claims + broken-card markers, map status to a verification bucket, and shape a claim mapping into the card dict the API returns. Written and tested before any grouping so the malformed-file path is proven early.
 
 **Files:**
-- Create: `src/archeon/review/__init__.py` (empty package marker)
-- Create: `src/archeon/review/store.py`
+- Create: `src/archaeon/review/__init__.py` (empty package marker)
+- Create: `src/archaeon/review/store.py`
 - Test: `tests/test_review_store.py`
 
 **Interfaces:**
@@ -277,7 +277,7 @@ Create `tests/test_review_store.py`:
 ```python
 import yaml
 
-from archeon.review import store
+from archaeon.review import store
 
 
 def _write(claims_dir, claim_id, **over):
@@ -341,22 +341,22 @@ def test_claim_card_passes_broken_through(tmp_path):
 - [ ] **Step 2: Run it to verify it fails**
 
 Run: `uv run pytest tests/test_review_store.py -v`
-Expected: FAIL with `ModuleNotFoundError: No module named 'archeon.review'`.
+Expected: FAIL with `ModuleNotFoundError: No module named 'archaeon.review'`.
 
 - [ ] **Step 3: Create the package marker**
 
-Create `src/archeon/review/__init__.py` (empty file).
+Create `src/archaeon/review/__init__.py` (empty file).
 
 - [ ] **Step 4: Implement the loader, buckets, and card shaping**
 
-Create `src/archeon/review/store.py`:
+Create `src/archaeon/review/store.py`:
 
 ```python
 from pathlib import Path
 
 import yaml
 
-from archeon.claims.schema import claim_version
+from archaeon.claims.schema import claim_version
 
 _BUCKET = {
     "machine_verified": "verified",
@@ -422,7 +422,7 @@ Expected: PASS (5 passed).
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/archeon/review/__init__.py src/archeon/review/store.py tests/test_review_store.py
+git add src/archaeon/review/__init__.py src/archaeon/review/store.py tests/test_review_store.py
 git commit -m "feat(review): claim loader, verification buckets, card shaping, broken-card handling"
 ```
 
@@ -433,11 +433,11 @@ git commit -m "feat(review): claim loader, verification buckets, card shaping, b
 Adds the treemap/drill data: components (grouped by the claim's `feature`) with per-bucket counts, and clusters within a component. Clusters come from Spec A's DB metadata when present (claim symbol names → `symbols.id` → `cluster_members` → `clusters.label`) and fall back to a flat per-source-file grouping when the DB is absent or has no cluster tables. Both paths return the same shape.
 
 **Files:**
-- Modify: `src/archeon/review/store.py`
+- Modify: `src/archaeon/review/store.py`
 - Test: extend `tests/test_review_store.py`
 
 **Interfaces:**
-- Consumes: `load_claim_files`, `verification_bucket`, `claim_card` (Task 2); an optional `sqlite3.Connection` (the existing `archeon.db.connect` shape, read-only).
+- Consumes: `load_claim_files`, `verification_bucket`, `claim_card` (Task 2); an optional `sqlite3.Connection` (the existing `archaeon.db.connect` shape, read-only).
 - Produces:
   - `components(claims_dir) -> list[dict]` — one dict per distinct `feature` (broken claims group under `"(unparsed)"`): keys `component, verified, contested, unrecovered, rejected, broken, total`, sorted by `-total`.
   - `clusters(claims_dir, component, conn=None) -> list[dict]` — one dict per cluster within `component`: keys `cluster` (label), `clustered` (bool, True iff from DB), `verified, contested, unrecovered, rejected, broken, total`, sorted by `-total`.
@@ -448,7 +448,7 @@ Adds the treemap/drill data: components (grouped by the claim's `feature`) with 
 Append to `tests/test_review_store.py`:
 
 ```python
-from archeon.db import connect
+from archaeon.db import connect
 
 
 def test_components_count_by_bucket(tmp_path):
@@ -508,11 +508,11 @@ def test_claims_in_filters_by_component_and_cluster(tmp_path):
 - [ ] **Step 2: Run it to verify it fails**
 
 Run: `uv run pytest tests/test_review_store.py -v`
-Expected: FAIL with `AttributeError: module 'archeon.review.store' has no attribute 'components'`.
+Expected: FAIL with `AttributeError: module 'archaeon.review.store' has no attribute 'components'`.
 
 - [ ] **Step 3: Implement grouping**
 
-Append to `src/archeon/review/store.py` (add `import sqlite3` to the imports at the top):
+Append to `src/archaeon/review/store.py` (add `import sqlite3` to the imports at the top):
 
 ```python
 _ZERO = ("verified", "contested", "unrecovered", "rejected", "broken")
@@ -627,7 +627,7 @@ Expected: PASS (all store tests, 10 passed).
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/archeon/review/store.py tests/test_review_store.py
+git add src/archaeon/review/store.py tests/test_review_store.py
 git commit -m "feat(review): component/cluster grouping with Spec A cluster-join and flat fallback"
 ```
 
@@ -638,7 +638,7 @@ git commit -m "feat(review): component/cluster grouping with Spec A cluster-join
 The queue surfaces the reviewer's remaining load, ordered so contested claims come first and then by `impact × uncertainty`. `uncertainty = 1 - confidence`; impact is symbol fan-in from the DB when available, else the claim's symbol count (spec §8 starting proxy). Already-reviewed terminal states (`expert_accepted`, `rejected`) drop out of the queue.
 
 **Files:**
-- Modify: `src/archeon/review/store.py`
+- Modify: `src/archaeon/review/store.py`
 - Test: `tests/test_review_queue.py`
 
 **Interfaces:**
@@ -653,8 +653,8 @@ Create `tests/test_review_queue.py`:
 ```python
 import yaml
 
-from archeon.review import store
-from archeon.db import connect
+from archaeon.review import store
+from archaeon.db import connect
 
 
 def _write(claims_dir, claim_id, **over):
@@ -709,11 +709,11 @@ def test_queue_uses_db_fan_in_for_impact(tmp_path):
 - [ ] **Step 2: Run it to verify it fails**
 
 Run: `uv run pytest tests/test_review_queue.py -v`
-Expected: FAIL with `AttributeError: module 'archeon.review.store' has no attribute 'queue'`.
+Expected: FAIL with `AttributeError: module 'archaeon.review.store' has no attribute 'queue'`.
 
 - [ ] **Step 3: Implement the queue**
 
-Append to `src/archeon/review/store.py`:
+Append to `src/archaeon/review/store.py`:
 
 ```python
 _TERMINAL = {"expert_accepted", "rejected"}
@@ -759,7 +759,7 @@ Expected: PASS (3 passed).
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/archeon/review/store.py tests/test_review_queue.py
+git add src/archaeon/review/store.py tests/test_review_queue.py
 git commit -m "feat(review): impact x uncertainty review queue with contested surfacing"
 ```
 
@@ -770,7 +770,7 @@ git commit -m "feat(review): impact x uncertainty review queue with contested su
 The server-side render layer. `render_spec(card)` returns a tagged union the frontend paints: a Mermaid diagram (`state`/`sequence`), a parameter table, or prose. Grammars are deterministic scaffolds over the fields a claim already has (`type`, `symbols`, `statement`) — no structured transition/threshold fields exist in the schema yet, so the grammars shape existing data per type and every unmapped type falls back to prose (spec §3.3, fallback-first).
 
 **Files:**
-- Create: `src/archeon/review/render.py`
+- Create: `src/archaeon/review/render.py`
 - Test: `tests/test_render_spec.py`
 
 **Interfaces:**
@@ -787,7 +787,7 @@ The server-side render layer. `render_spec(card)` returns a tagged union the fro
 Create `tests/test_render_spec.py`:
 
 ```python
-from archeon.review import render
+from archaeon.review import render
 
 
 def _card(type_, symbols, statement="does a thing"):
@@ -831,11 +831,11 @@ def test_mermaid_node_ids_are_sanitized():
 - [ ] **Step 2: Run it to verify it fails**
 
 Run: `uv run pytest tests/test_render_spec.py -v`
-Expected: FAIL with `ModuleNotFoundError: No module named 'archeon.review.render'`.
+Expected: FAIL with `ModuleNotFoundError: No module named 'archaeon.review.render'`.
 
 - [ ] **Step 3: Implement the render specs**
 
-Create `src/archeon/review/render.py`:
+Create `src/archaeon/review/render.py`:
 
 ```python
 def _node(name: str) -> str:
@@ -894,7 +894,7 @@ Expected: PASS (5 passed).
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/archeon/review/render.py tests/test_render_spec.py
+git add src/archaeon/review/render.py tests/test_render_spec.py
 git commit -m "feat(review): per-type visual-grammar render-specs with prose fallback"
 ```
 
@@ -905,11 +905,11 @@ git commit -m "feat(review): per-type visual-grammar render-specs with prose fal
 Assembles the store, render, and `save_claim` behind a JSON API and mounts the static frontend. The POST route maps review actions to statuses, enforces the version token (409 on stale), and surfaces write failures (spec §5).
 
 **Files:**
-- Create: `src/archeon/review/server.py`
+- Create: `src/archaeon/review/server.py`
 - Test: `tests/test_review_server.py`
 
 **Interfaces:**
-- Consumes: `store.components/clusters/claims_in/queue` (Tasks 2–4); `render.render_spec` (Task 5); `schema.save_claim`, `schema.StaleClaimError` (Task 1); `archeon.db.connect`.
+- Consumes: `store.components/clusters/claims_in/queue` (Tasks 2–4); `render.render_spec` (Task 5); `schema.save_claim`, `schema.StaleClaimError` (Task 1); `archaeon.db.connect`.
 - Produces:
   - `create_app(claims_dir, db=None) -> fastapi.FastAPI`. Routes:
     - `GET /api/components` → `store.components`.
@@ -927,7 +927,7 @@ Create `tests/test_review_server.py`:
 import yaml
 from fastapi.testclient import TestClient
 
-from archeon.review.server import create_app
+from archaeon.review.server import create_app
 
 
 def _write(claims_dir, claim_id, **over):
@@ -1011,21 +1011,21 @@ def test_index_html_served_at_root(tmp_path):
 - [ ] **Step 2: Run it to verify it fails**
 
 Run: `uv run pytest tests/test_review_server.py -v`
-Expected: FAIL with `ModuleNotFoundError: No module named 'archeon.review.server'` (the static-file test also requires Task 8's assets; it will pass once `index.html` exists — see Step 4 note).
+Expected: FAIL with `ModuleNotFoundError: No module named 'archaeon.review.server'` (the static-file test also requires Task 8's assets; it will pass once `index.html` exists — see Step 4 note).
 
 - [ ] **Step 3: Add a placeholder static directory so the mount has a target**
 
-Create `src/archeon/review/static/index.html` with a minimal placeholder (Task 8 replaces it with the real app):
+Create `src/archaeon/review/static/index.html` with a minimal placeholder (Task 8 replaces it with the real app):
 
 ```html
 <!doctype html>
-<title>Archeon Review</title>
+<title>Archaeon Review</title>
 <div id="app">loading…</div>
 ```
 
 - [ ] **Step 4: Implement the app factory**
 
-Create `src/archeon/review/server.py`:
+Create `src/archaeon/review/server.py`:
 
 ```python
 from pathlib import Path
@@ -1034,9 +1034,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from archeon.claims.schema import StaleClaimError, save_claim
-from archeon.db import connect
-from archeon.review import render, store
+from archaeon.claims.schema import StaleClaimError, save_claim
+from archaeon.db import connect
+from archaeon.review import render, store
 
 
 class ReviewIn(BaseModel):
@@ -1048,7 +1048,7 @@ class ReviewIn(BaseModel):
 def create_app(claims_dir, db=None) -> FastAPI:
     claims_dir = Path(claims_dir)
     conn = connect(db) if db else None
-    app = FastAPI(title="Archeon Review")
+    app = FastAPI(title="Archaeon Review")
 
     @app.get("/api/components")
     def components():
@@ -1106,7 +1106,7 @@ Expected: PASS (8 passed).
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/archeon/review/server.py src/archeon/review/static/index.html tests/test_review_server.py
+git add src/archaeon/review/server.py src/archaeon/review/static/index.html tests/test_review_server.py
 git commit -m "feat(review): FastAPI app - JSON API, version-checked POST writer, static mount"
 ```
 
@@ -1117,12 +1117,12 @@ git commit -m "feat(review): FastAPI app - JSON API, version-checked POST writer
 Wires the app into the CLI. `--config` is optional; when given, the component's DB is opened read-only to enable cluster metadata and fan-in impact — otherwise the tool runs fully on the claims directory alone (spec §5 degradation).
 
 **Files:**
-- Modify: `src/archeon/cli.py`
+- Modify: `src/archaeon/cli.py`
 - Test: `tests/test_cli_review.py`
 
 **Interfaces:**
 - Consumes: `create_app` (Task 6); `config_mod.load` (existing).
-- Produces: `archeon review --claims <dir> [--config <toml>] [--host 127.0.0.1] [--port 8000]` — builds the app and calls `uvicorn.run(app, host, port)`.
+- Produces: `archaeon review --claims <dir> [--config <toml>] [--host 127.0.0.1] [--port 8000]` — builds the app and calls `uvicorn.run(app, host, port)`.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1131,7 +1131,7 @@ Create `tests/test_cli_review.py`:
 ```python
 from click.testing import CliRunner
 
-from archeon import cli
+from archaeon import cli
 
 
 def test_review_builds_app_and_runs_uvicorn(tmp_path, monkeypatch):
@@ -1165,21 +1165,21 @@ Expected: FAIL with a `click` "No such command 'review'" error (exit code non-ze
 
 - [ ] **Step 3: Implement the command**
 
-Edit `src/archeon/cli.py`. Add this command (place it after `cli_synthesize`, before `cli_claims_eval`):
+Edit `src/archaeon/cli.py`. Add this command (place it after `cli_synthesize`, before `cli_claims_eval`):
 
 ```python
 @main.command("review")
 @click.option("--claims", "claims_dir", default="claims", show_default=True,
               help="directory of claim YAML files to review")
 @click.option("--config", "config_path", default=None,
-              help="optional archeon.toml; enables cluster + fan-in metadata")
+              help="optional archaeon.toml; enables cluster + fan-in metadata")
 @click.option("--host", default="127.0.0.1", show_default=True)
 @click.option("--port", default=8000, show_default=True, type=int)
 def cli_review(claims_dir, config_path, host, port):
     """Local review UI: browse + accept/edit/reject claims back into YAML."""
     import uvicorn
 
-    from archeon.review.server import create_app
+    from archaeon.review.server import create_app
     db = None
     if config_path:
         cfg = config_mod.load(Path(config_path))
@@ -1202,8 +1202,8 @@ Expected: all tests pass.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/archeon/cli.py tests/test_cli_review.py
-git commit -m "feat(cli): archeon review command launches the local review UI"
+git add src/archaeon/cli.py tests/test_cli_review.py
+git commit -m "feat(cli): archaeon review command launches the local review UI"
 ```
 
 ---
@@ -1215,9 +1215,9 @@ The vanilla-JS frontend: a component treemap colored by verification state, dril
 Use the **webapp-testing** skill for the Playwright test (browser install, launching the app, and driving the page).
 
 **Files:**
-- Modify: `src/archeon/review/static/index.html` (replace the placeholder)
-- Create: `src/archeon/review/static/style.css`
-- Create: `src/archeon/review/static/app.js`
+- Modify: `src/archaeon/review/static/index.html` (replace the placeholder)
+- Create: `src/archaeon/review/static/style.css`
+- Create: `src/archaeon/review/static/app.js`
 - Modify: `pyproject.toml` (dev group: add `playwright`)
 - Test: `tests/test_review_smoke.py`
 
@@ -1241,7 +1241,7 @@ Expected: Playwright and a Chromium build install with no error.
 
 - [ ] **Step 3: Write the frontend — styles**
 
-Create `src/archeon/review/static/style.css`:
+Create `src/archaeon/review/static/style.css`:
 
 ```css
 * { box-sizing: border-box; }
@@ -1274,15 +1274,15 @@ table.grammar td { border: 1px solid #ccc; padding: 2px 6px; }
 
 - [ ] **Step 4: Write the frontend — HTML shell**
 
-Replace `src/archeon/review/static/index.html` with:
+Replace `src/archaeon/review/static/index.html` with:
 
 ```html
 <!doctype html>
 <meta charset="utf-8">
-<title>Archeon Review</title>
+<title>Archaeon Review</title>
 <link rel="stylesheet" href="/style.css">
 <header>
-  <strong>Archeon Review</strong>
+  <strong>Archaeon Review</strong>
   <button id="tab-browse" class="active">Browse</button>
   <button id="tab-queue">Queue</button>
   <span class="hint">focus a card, then: <b>a</b> accept · <b>e</b> edit · <b>r</b> reject</span>
@@ -1296,7 +1296,7 @@ Replace `src/archeon/review/static/index.html` with:
 
 - [ ] **Step 5: Write the frontend — app.js**
 
-Create `src/archeon/review/static/app.js`:
+Create `src/archaeon/review/static/app.js`:
 
 ```javascript
 const nav = document.getElementById("nav");
@@ -1488,7 +1488,7 @@ def test_browse_and_accept_round_trip(tmp_path):
     _write_claim(tmp_path)
     port = _free_port()
     proc = subprocess.Popen(
-        [sys.executable, "-m", "archeon.cli", "review",
+        [sys.executable, "-m", "archaeon.cli", "review",
          "--claims", str(tmp_path), "--port", str(port)],
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     try:
@@ -1518,7 +1518,7 @@ Expected: PASS (1 passed). If Playwright's browser is missing, it fails with a c
 
 - [ ] **Step 8: Manual visual check (optional but recommended)**
 
-Run: `uv run archeon review --claims claims_motor_ctrl --port 8000` and open `http://127.0.0.1:8000/`.
+Run: `uv run archaeon review --claims claims_motor_ctrl --port 8000` and open `http://127.0.0.1:8000/`.
 Expected: components list with colored bars; drilling reaches claim cards; `a`/`e`/`r` change a card and the corresponding `claims_motor_ctrl/*.yaml` shows a git diff. Stop with Ctrl-C.
 
 - [ ] **Step 9: Run the full suite**
@@ -1529,7 +1529,7 @@ Expected: all tests pass.
 - [ ] **Step 10: Commit**
 
 ```bash
-git add pyproject.toml uv.lock src/archeon/review/static tests/test_review_smoke.py
+git add pyproject.toml uv.lock src/archaeon/review/static tests/test_review_smoke.py
 git commit -m "feat(review): frontend bundle (treemap/cards/queue/keybindings) + Playwright smoke test"
 ```
 

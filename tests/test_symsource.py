@@ -1,5 +1,5 @@
-from archeon.codegraph.symsource import symbol_rows
-from archeon.db import connect
+from archaeon.codegraph.symsource import symbol_rows
+from archaeon.db import connect
 
 
 def _insert(conn, name, path, line, end_line):

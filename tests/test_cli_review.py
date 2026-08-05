@@ -1,6 +1,6 @@
 from click.testing import CliRunner
 
-from archeon import cli
+from archaeon import cli
 
 
 def test_review_builds_app_and_runs_uvicorn(tmp_path, monkeypatch):

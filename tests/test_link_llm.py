@@ -1,5 +1,5 @@
-from archeon.analysis.link_llm import candidate_tickets, recover_links
-from archeon.db import connect
+from archaeon.analysis.link_llm import candidate_tickets, recover_links
+from archaeon.db import connect
 
 
 class FakeAsker:

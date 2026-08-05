@@ -1,7 +1,7 @@
-# Archeon
+# Archaeon
 
 Evidence lake (P0): recovers requirements evidence from a codebase and its
-artifacts. See docs/superpowers/specs/2026-07-23-archeon-design.md.
+artifacts. See docs/superpowers/specs/2026-07-23-archaeon-design.md.
 
 ## Scope of this repository
 
@@ -11,23 +11,23 @@ codebase; their recovered claims, evidence databases, gold label sets, and
 run write-ups are not published here. Where a spec or plan cites one, it is
 marked *(internal validation run — not in this repo)*. Documentation uses a
 fictional `motor-ctrl` component throughout, matching
-[archeon.example.toml](archeon.example.toml).
+[archaeon.example.toml](archaeon.example.toml).
 
 ## Quickstart
 
     uv sync
-    cp archeon.example.toml archeon.toml   # edit paths and Jira/PR settings
-    set ARCHEON_JIRA_TOKEN=...             # or $env:ARCHEON_JIRA_TOKEN
+    cp archaeon.example.toml archaeon.toml   # edit paths and Jira/PR settings
+    set ARCHAEON_JIRA_TOKEN=...             # or $env:ARCHAEON_JIRA_TOKEN
     gh auth login                          # PRs use the GitHub CLI's own auth
-    uv run archeon ingest-git              # scoped to component paths, bots excluded
-    uv run archeon ingest-prs              # PRs that contain the component's commits
-    uv run archeon ingest-jira             # only tickets referenced by those commits/PRs
-    # uv run archeon ingest-wiki           # optional: local Confluence HTML export
-    uv run archeon scan
-    uv run archeon coupling
-    uv run archeon link
-    uv run archeon link-llm                # Claude Agent SDK (see Authentication)
-    uv run archeon stats
+    uv run archaeon ingest-git              # scoped to component paths, bots excluded
+    uv run archaeon ingest-prs              # PRs that contain the component's commits
+    uv run archaeon ingest-jira             # only tickets referenced by those commits/PRs
+    # uv run archaeon ingest-wiki           # optional: local Confluence HTML export
+    uv run archaeon scan
+    uv run archaeon coupling
+    uv run archaeon link
+    uv run archaeon link-llm                # Claude Agent SDK (see Authentication)
+    uv run archaeon stats
 
 ## Authentication (link-llm)
 
@@ -39,14 +39,14 @@ fictional `motor-ctrl` component throughout, matching
 
 `link-llm` deliberately hides `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` from
 the SDK so it always uses the CLI login rather than API billing. The other
-commands are unaffected — `ARCHEON_JIRA_TOKEN` and `ARCHEON_GIT_TOKEN` are
+commands are unaffected — `ARCHAEON_JIRA_TOKEN` and `ARCHAEON_GIT_TOKEN` are
 still plain API tokens for Jira and the git host.
 
 Because of that login, the cost figures `synthesize` and `cluster` report are
 **API-equivalent** (what the run would have cost on an API key), not money
 charged. One honest exception: if `CLAUDE_CODE_USE_BEDROCK`,
 `CLAUDE_CODE_USE_VERTEX` or `ANTHROPIC_BASE_URL` is set, the CLI may be routed
-somewhere that really does bill, which archeon cannot see from the outside — so
+somewhere that really does bill, which archaeon cannot see from the outside — so
 it reports the billing route as unknown instead of claiming the run was free:
 `synthesize`'s `run_cost.json` carries `"billed": null`, and `cluster` (which
 writes no JSON, only the printed summary) prints the same "unknown" wording.
@@ -62,9 +62,9 @@ Hand-label a random sample of commits into `gold.csv`:
 (empty ticket_key = commit genuinely has no ticket). Then compare methods —
 this is the commit-level vs PR-level story:
 
-    uv run archeon eval --gold gold.csv --method key_regex                    # commit messages only
-    uv run archeon eval --gold gold.csv --method key_regex --method pr_inherited  # + PR-level (title/body/branch inherited to member commits)
-    uv run archeon eval --gold gold.csv                                       # all methods (adds the llm tail)
+    uv run archaeon eval --gold gold.csv --method key_regex                    # commit messages only
+    uv run archaeon eval --gold gold.csv --method key_regex --method pr_inherited  # + PR-level (title/body/branch inherited to member commits)
+    uv run archaeon eval --gold gold.csv                                       # all methods (adds the llm tail)
 
 Commit-message keys alone cover only the commits that name a ticket; most
 tickets live on the PR (title, body, or branch) and are inherited to the PR's
@@ -83,7 +83,7 @@ The what-layer (behavior, structure, constraint values) stands on code alone, so
 this needs only `scan` to have run — not the artifact links. Synthesize and
 adversarially verify claims for one feature area:
 
-    uv run archeon synthesize --feature src/motor_ctrl/thermal/ --out claims
+    uv run archaeon synthesize --feature src/motor_ctrl/thermal/ --out claims
     # writes one YAML claim per finding to claims/, each machine_verified or contested
     # plus claims/run_cost.json: the run's actual LLM cost, per stage and model
 
@@ -94,7 +94,7 @@ without producing an answer.
 
 Review the YAML, label each claim in a CSV (`claim_id,correct` with yes/no), then:
 
-    uv run archeon claims-eval --claims claims --labels claim_labels.csv
+    uv run archaeon claims-eval --claims claims --labels claim_labels.csv
     # prints what-layer precision (gate: >= 0.95)
 
 `synthesize` uses the Claude Agent SDK (same CLI auth as `link-llm`); set
@@ -110,11 +110,11 @@ that shaped it, resolves those to their PRs and tickets, and uses those
 artifacts as corroborating evidence. It needs the artifact ingest commands to
 have run, not just `scan`:
 
-    uv run archeon ingest-git
-    uv run archeon ingest-prs
-    uv run archeon ingest-jira
-    uv run archeon synthesize --all-clusters --out claims
-    uv run archeon why --claims claims
+    uv run archaeon ingest-git
+    uv run archaeon ingest-prs
+    uv run archaeon ingest-jira
+    uv run archaeon synthesize --all-clusters --out claims
+    uv run archaeon why --claims claims
     # writes WHY-*.yaml beside the CLM-*.yaml, plus why_cost.json
 
 Every artifact excerpt a why-claim quotes is checked **mechanically** against
@@ -127,7 +127,7 @@ confidence 0.4, and is never auto-verified.
 Measure the gate (corroborated why-layer precision >= 0.80) by labeling the
 why-claims in a CSV (`claim_id,correct`) and reusing `claims-eval`:
 
-    uv run archeon claims-eval --claims claims --labels why_labels.csv
+    uv run archaeon claims-eval --claims claims --labels why_labels.csv
 
 Label the *rationale*, not whether the cited artifact exists — grounding
 already guarantees existence. A labels file containing only `WHY-` ids reports

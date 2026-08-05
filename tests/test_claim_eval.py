@@ -1,5 +1,5 @@
-from archeon.claims.claim_eval import evaluate_claims, load_labels
-from archeon.claims.schema import Claim
+from archaeon.claims.claim_eval import evaluate_claims, load_labels
+from archaeon.claims.schema import Claim
 
 
 def test_load_labels(tmp_path):

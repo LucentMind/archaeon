@@ -2,11 +2,11 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add an `archeon why` stage that recovers why-layer claims (intent, rationale, constraint origin, tradeoff) by walking each what-claim's commit-pinned code span back through git history to the tickets and PRs that shaped it, then grounding and adversarially verifying the rationale against those artifacts.
+**Goal:** Add an `archaeon why` stage that recovers why-layer claims (intent, rationale, constraint origin, tradeoff) by walking each what-claim's commit-pinned code span back through git history to the tickets and PRs that shaped it, then grounding and adversarially verifying the rationale against those artifacts.
 
 **Architecture:** Three new modules with clean seams. `retrieval/archaeology.py` is pure git+SQL (span → shaping commits → ticket/PR refs). `claims/why_corpus.py` is pure SQL (rank and pack artifacts into a token-bounded corpus). `claims/why.py` holds synthesis, a deterministic LLM-free citation-grounding pass, and adversarial verification — mirroring `claims/recover.py`'s shape and taking an injected `ask` callable. `cli.py` gains a `why` command. Nothing new goes in SQL; results live in the claim YAML.
 
-**Tech Stack:** Python ≥3.13, click, PyYAML, sqlite3, `git` CLI via subprocess, Claude Agent SDK via `archeon.llm.AgentClassifier`, pytest.
+**Tech Stack:** Python ≥3.13, click, PyYAML, sqlite3, `git` CLI via subprocess, Claude Agent SDK via `archaeon.llm.AgentClassifier`, pytest.
 
 **Spec:** [2026-07-25-p1-hardening-d-why-layer-design.md](../specs/2026-07-25-p1-hardening-d-why-layer-design.md)
 
@@ -27,13 +27,13 @@
 
 | File | Responsibility |
 |---|---|
-| `src/archeon/claims/schema.py` (modify) | `WHY_CLAIM_TYPES`, `corroboration` + `explains` fields, `CODE_INFERRED_MAX_CONFIDENCE` |
-| `src/archeon/retrieval/archaeology.py` (create) | span → shaping commits; commits → ticket/PR refs |
-| `src/archeon/config.py` (modify) | `WHY_DEFAULTS` + `why()` merge helper |
-| `src/archeon/claims/why_corpus.py` (create) | rank + pack artifacts into a token-bounded corpus |
-| `src/archeon/claims/why.py` (create) | prompts, synthesis, grounding, verification |
-| `src/archeon/claims/claim_eval.py` (modify) | corroborated-precision metric |
-| `src/archeon/cli.py` (modify) | `why` command, preconditions, cost wiring |
+| `src/archaeon/claims/schema.py` (modify) | `WHY_CLAIM_TYPES`, `corroboration` + `explains` fields, `CODE_INFERRED_MAX_CONFIDENCE` |
+| `src/archaeon/retrieval/archaeology.py` (create) | span → shaping commits; commits → ticket/PR refs |
+| `src/archaeon/config.py` (modify) | `WHY_DEFAULTS` + `why()` merge helper |
+| `src/archaeon/claims/why_corpus.py` (create) | rank + pack artifacts into a token-bounded corpus |
+| `src/archaeon/claims/why.py` (create) | prompts, synthesis, grounding, verification |
+| `src/archaeon/claims/claim_eval.py` (modify) | corroborated-precision metric |
+| `src/archaeon/cli.py` (modify) | `why` command, preconditions, cost wiring |
 | `README.md` (modify) | why-layer runbook + gate |
 
 Tests mirror this: `tests/test_archaeology.py`, `tests/test_why_corpus.py`, `tests/test_why.py`, plus additions to `tests/test_claims_schema.py`, `tests/test_claim_eval.py`, `tests/test_cli.py`, `tests/test_retrieval_config.py`.
@@ -43,7 +43,7 @@ Tests mirror this: `tests/test_archaeology.py`, `tests/test_why_corpus.py`, `tes
 ### Task 1: Schema fields and why-layer types
 
 **Files:**
-- Modify: `src/archeon/claims/schema.py:1-55`
+- Modify: `src/archaeon/claims/schema.py:1-55`
 - Test: `tests/test_claims_schema.py`
 
 **Interfaces:**
@@ -55,7 +55,7 @@ Tests mirror this: `tests/test_archaeology.py`, `tests/test_why_corpus.py`, `tes
 Append to `tests/test_claims_schema.py`:
 
 ```python
-from archeon.claims.schema import (
+from archaeon.claims.schema import (
     CODE_INFERRED_MAX_CONFIDENCE, CLAIM_TYPES, WHY_CLAIM_TYPES, Claim)
 
 
@@ -99,7 +99,7 @@ Expected: FAIL with `ImportError: cannot import name 'WHY_CLAIM_TYPES'`
 
 - [ ] **Step 3: Write minimal implementation**
 
-In `src/archeon/claims/schema.py`, after the existing `CLAIM_TYPES` block:
+In `src/archaeon/claims/schema.py`, after the existing `CLAIM_TYPES` block:
 
 ```python
 # why-layer claim types (code is a hypothesis; artifacts corroborate)
@@ -143,7 +143,7 @@ Expected: PASS
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/archeon/claims/schema.py tests/test_claims_schema.py
+git add src/archaeon/claims/schema.py tests/test_claims_schema.py
 git commit -m "feat(claims/schema): why-layer types, corroboration and explains fields"
 ```
 
@@ -152,11 +152,11 @@ git commit -m "feat(claims/schema): why-layer types, corroboration and explains 
 ### Task 2: Span archaeology — shaping commits
 
 **Files:**
-- Create: `src/archeon/retrieval/archaeology.py`
+- Create: `src/archaeon/retrieval/archaeology.py`
 - Test: `tests/test_archaeology.py`
 
 **Interfaces:**
-- Consumes: `archeon.connectors.git_connector._run(repo_path, *args) -> CompletedProcess` (does not raise on non-zero; callers inspect `returncode`).
+- Consumes: `archaeon.connectors.git_connector._run(repo_path, *args) -> CompletedProcess` (does not raise on non-zero; callers inspect `returncode`).
 - Produces: `shaping_commits(repo_path, path, start, end, rev="HEAD", max_commits=50) -> list[str]` and `file_level_commits(repo_path, path, max_commits=50) -> list[str]`, both newest-first, both returning `[]` on any git failure.
 
 **Background the implementer needs:** `git log -L<start>,<end>:<path> <rev> --format=%H -s` lists the commits that changed that line range, newest first. `-s` suppresses the patch body so only shas print. `-L` **cannot** be combined with `--follow` (git exits with "--follow requires exactly one pathspec"), which is why the file-level fallback is a separate function. Passing `rev` matters: line numbers are only meaningful against the commit they were captured at, which is exactly what Spec B's `evidence.commit_sha` records.
@@ -168,7 +168,7 @@ Create `tests/test_archaeology.py`:
 ```python
 import subprocess
 
-from archeon.retrieval.archaeology import file_level_commits, shaping_commits
+from archaeon.retrieval.archaeology import file_level_commits, shaping_commits
 
 
 def _git(repo, *a):
@@ -254,11 +254,11 @@ def test_file_level_commits_respects_max_and_unknown_path(tmp_path):
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `uv run pytest tests/test_archaeology.py -v`
-Expected: FAIL with `ModuleNotFoundError: No module named 'archeon.retrieval.archaeology'`
+Expected: FAIL with `ModuleNotFoundError: No module named 'archaeon.retrieval.archaeology'`
 
 - [ ] **Step 3: Write minimal implementation**
 
-Create `src/archeon/retrieval/archaeology.py`:
+Create `src/archaeon/retrieval/archaeology.py`:
 
 ```python
 """Span-scoped git archaeology: which commits shaped a cited line range.
@@ -274,7 +274,7 @@ from pathlib import Path
 # Reuses the git connector's runner: it deliberately does not raise on a
 # non-zero exit, so a missing path or bad rev degrades to [] here instead
 # of aborting a whole why-run.
-from archeon.connectors.git_connector import _run as git_run
+from archaeon.connectors.git_connector import _run as git_run
 
 
 def _shas(result, max_commits: int) -> list[str]:
@@ -327,7 +327,7 @@ Expected: PASS (9 tests)
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/archeon/retrieval/archaeology.py tests/test_archaeology.py
+git add src/archaeon/retrieval/archaeology.py tests/test_archaeology.py
 git commit -m "feat(archaeology): span-scoped shaping-commit recovery anchored on the pin rev"
 ```
 
@@ -336,7 +336,7 @@ git commit -m "feat(archaeology): span-scoped shaping-commit recovery anchored o
 ### Task 3: Resolve shaping commits to tickets and PRs
 
 **Files:**
-- Modify: `src/archeon/retrieval/archaeology.py`
+- Modify: `src/archaeon/retrieval/archaeology.py`
 - Test: `tests/test_archaeology.py`
 
 **Interfaces:**
@@ -350,8 +350,8 @@ git commit -m "feat(archaeology): span-scoped shaping-commit recovery anchored o
 Append to `tests/test_archaeology.py`:
 
 ```python
-from archeon.db import connect
-from archeon.retrieval.archaeology import ArtifactRefs, artifacts_for_commits
+from archaeon.db import connect
+from archaeon.retrieval.archaeology import ArtifactRefs, artifacts_for_commits
 
 
 def _lake(tmp_path):
@@ -422,7 +422,7 @@ Expected: FAIL with `ImportError: cannot import name 'ArtifactRefs'`
 
 - [ ] **Step 3: Write minimal implementation**
 
-Add to `src/archeon/retrieval/archaeology.py` (extend the import line to `from dataclasses import dataclass, field`):
+Add to `src/archaeon/retrieval/archaeology.py` (extend the import line to `from dataclasses import dataclass, field`):
 
 ```python
 @dataclass
@@ -487,7 +487,7 @@ Expected: PASS (15 tests)
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/archeon/retrieval/archaeology.py tests/test_archaeology.py
+git add src/archaeon/retrieval/archaeology.py tests/test_archaeology.py
 git commit -m "feat(archaeology): resolve shaping commits to tickets and PRs with support counts"
 ```
 
@@ -496,7 +496,7 @@ git commit -m "feat(archaeology): resolve shaping commits to tickets and PRs wit
 ### Task 4: `[why]` config block
 
 **Files:**
-- Modify: `src/archeon/config.py:12-37`
+- Modify: `src/archaeon/config.py:12-37`
 - Test: `tests/test_retrieval_config.py`
 
 **Interfaces:**
@@ -510,7 +510,7 @@ git commit -m "feat(archaeology): resolve shaping commits to tickets and PRs wit
 Append to `tests/test_retrieval_config.py`:
 
 ```python
-from archeon import config as config_mod
+from archaeon import config as config_mod
 
 
 def test_why_defaults_apply_when_block_absent():
@@ -541,11 +541,11 @@ def test_why_is_not_required_for_config_validation(tmp_path):
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `uv run pytest tests/test_retrieval_config.py -v -k why`
-Expected: FAIL with `AttributeError: module 'archeon.config' has no attribute 'why'`
+Expected: FAIL with `AttributeError: module 'archaeon.config' has no attribute 'why'`
 
 - [ ] **Step 3: Write minimal implementation**
 
-Add to `src/archeon/config.py` after `RETRIEVAL_DEFAULTS`:
+Add to `src/archaeon/config.py` after `RETRIEVAL_DEFAULTS`:
 
 ```python
 WHY_DEFAULTS = {
@@ -576,7 +576,7 @@ Expected: PASS
 
 - [ ] **Step 5: Document the block in the example config**
 
-Append to `archeon.example.toml`:
+Append to `archaeon.example.toml`:
 
 ```toml
 # [why]                                    # optional — these are the defaults
@@ -588,7 +588,7 @@ Append to `archeon.example.toml`:
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/archeon/config.py tests/test_retrieval_config.py archeon.example.toml
+git add src/archaeon/config.py tests/test_retrieval_config.py archaeon.example.toml
 git commit -m "feat(config): optional [why] block with defaults"
 ```
 
@@ -597,11 +597,11 @@ git commit -m "feat(config): optional [why] block with defaults"
 ### Task 5: Artifact corpus builder
 
 **Files:**
-- Create: `src/archeon/claims/why_corpus.py`
+- Create: `src/archaeon/claims/why_corpus.py`
 - Test: `tests/test_why_corpus.py`
 
 **Interfaces:**
-- Consumes: `ArtifactRefs` and `artifacts_for_commits` (Task 3); `shaping_commits`, `file_level_commits` (Task 2); `archeon.retrieval.bundle.estimate_tokens(text) -> int`; `config.why()` (Task 4).
+- Consumes: `ArtifactRefs` and `artifacts_for_commits` (Task 3); `shaping_commits`, `file_level_commits` (Task 2); `archaeon.retrieval.bundle.estimate_tokens(text) -> int`; `config.why()` (Task 4).
 - Produces:
   - `spans_for_claims(claims) -> list[tuple[str, int, int, str]]` — `(path, start, end, rev)` per pinned code evidence, deduped.
   - `collect_artifacts(conn, repo_path, claims, why_cfg) -> ArtifactRefs`
@@ -614,11 +614,11 @@ git commit -m "feat(config): optional [why] block with defaults"
 Create `tests/test_why_corpus.py`:
 
 ```python
-from archeon.claims.schema import Claim, Evidence
-from archeon.claims.why_corpus import (
+from archaeon.claims.schema import Claim, Evidence
+from archaeon.claims.why_corpus import (
     build_corpus, collect_artifacts, spans_for_claims)
-from archeon.db import connect
-from archeon.retrieval.archaeology import ArtifactRefs
+from archaeon.db import connect
+from archaeon.retrieval.archaeology import ArtifactRefs
 
 
 def _pinned(ref, sha, start, end):
@@ -707,7 +707,7 @@ def test_missing_artifact_rows_are_skipped_not_fatal(tmp_path):
 
 
 def test_collect_artifacts_walks_spans_to_artifacts(tmp_path, monkeypatch):
-    import archeon.claims.why_corpus as mod
+    import archaeon.claims.why_corpus as mod
     conn = _lake(tmp_path)
     conn.execute("INSERT INTO commits(sha, author, date, message) "
                  "VALUES ('sha_x', 'a', '2026-01-01', 'm')")
@@ -726,11 +726,11 @@ def test_collect_artifacts_walks_spans_to_artifacts(tmp_path, monkeypatch):
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `uv run pytest tests/test_why_corpus.py -v`
-Expected: FAIL with `ModuleNotFoundError: No module named 'archeon.claims.why_corpus'`
+Expected: FAIL with `ModuleNotFoundError: No module named 'archaeon.claims.why_corpus'`
 
 - [ ] **Step 3: Write minimal implementation**
 
-Create `src/archeon/claims/why_corpus.py`:
+Create `src/archaeon/claims/why_corpus.py`:
 
 ```python
 """Assemble the why-layer artifact corpus for a set of what-claims.
@@ -741,9 +741,9 @@ half of Pass 2 is testable without a model.
 
 from pathlib import Path
 
-from archeon.retrieval.archaeology import (
+from archaeon.retrieval.archaeology import (
     artifacts_for_commits, file_level_commits, shaping_commits)
-from archeon.retrieval.bundle import estimate_tokens
+from archaeon.retrieval.bundle import estimate_tokens
 
 # Sorts last when an artifact has no usable timestamp.
 _NO_TS = ""
@@ -869,7 +869,7 @@ Expected: PASS (9 tests)
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/archeon/claims/why_corpus.py tests/test_why_corpus.py
+git add src/archaeon/claims/why_corpus.py tests/test_why_corpus.py
 git commit -m "feat(claims): token-bounded why-layer artifact corpus ranked by support"
 ```
 
@@ -878,7 +878,7 @@ git commit -m "feat(claims): token-bounded why-layer artifact corpus ranked by s
 ### Task 6: Deterministic citation grounding
 
 **Files:**
-- Create: `src/archeon/claims/why.py`
+- Create: `src/archaeon/claims/why.py`
 - Test: `tests/test_why.py`
 
 **Interfaces:**
@@ -894,10 +894,10 @@ git commit -m "feat(claims): token-bounded why-layer artifact corpus ranked by s
 Create `tests/test_why.py`:
 
 ```python
-from archeon.claims.schema import (
+from archaeon.claims.schema import (
     CODE_INFERRED_MAX_CONFIDENCE, Claim, Evidence)
-from archeon.claims.why import artifact_body, ground_citations, normalize_text
-from archeon.db import connect
+from archaeon.claims.why import artifact_body, ground_citations, normalize_text
+from archaeon.db import connect
 
 
 def _lake(tmp_path):
@@ -1033,11 +1033,11 @@ def test_what_layer_claims_are_left_alone(tmp_path):
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `uv run pytest tests/test_why.py -v`
-Expected: FAIL with `ModuleNotFoundError: No module named 'archeon.claims.why'`
+Expected: FAIL with `ModuleNotFoundError: No module named 'archaeon.claims.why'`
 
 - [ ] **Step 3: Write minimal implementation**
 
-Create `src/archeon/claims/why.py`:
+Create `src/archaeon/claims/why.py`:
 
 ```python
 """Why-layer claim recovery (Pass 2).
@@ -1049,7 +1049,7 @@ attached to the AgentClassifier by the CLI, so nothing here knows about it.
 
 import re
 
-from archeon.claims.schema import CODE_INFERRED_MAX_CONFIDENCE
+from archaeon.claims.schema import CODE_INFERRED_MAX_CONFIDENCE
 
 _WS = re.compile(r"\s+")
 
@@ -1143,7 +1143,7 @@ Expected: PASS (12 tests)
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/archeon/claims/why.py tests/test_why.py
+git add src/archaeon/claims/why.py tests/test_why.py
 git commit -m "feat(claims/why): deterministic citation grounding against the lake"
 ```
 
@@ -1152,7 +1152,7 @@ git commit -m "feat(claims/why): deterministic citation grounding against the la
 ### Task 7: Why-claim synthesis
 
 **Files:**
-- Modify: `src/archeon/claims/why.py`
+- Modify: `src/archaeon/claims/why.py`
 - Test: `tests/test_why.py`
 
 **Interfaces:**
@@ -1168,7 +1168,7 @@ Append to `tests/test_why.py`:
 ```python
 import json
 
-from archeon.claims.why import synthesize_why_claims
+from archaeon.claims.why import synthesize_why_claims
 
 
 def _what(cid="CLM-0001"):
@@ -1277,7 +1277,7 @@ Expected: FAIL with `ImportError: cannot import name 'synthesize_why_claims'`
 
 - [ ] **Step 3: Write minimal implementation**
 
-Add to `src/archeon/claims/why.py` (extend imports with `import json`, `from archeon.claims.recover import _strip_fence`, and `from archeon.claims.schema import WHY_CLAIM_TYPES, Claim, Evidence`):
+Add to `src/archaeon/claims/why.py` (extend imports with `import json`, `from archaeon.claims.recover import _strip_fence`, and `from archaeon.claims.schema import WHY_CLAIM_TYPES, Claim, Evidence`):
 
 ```python
 WHY_SYNTH_SYSTEM = (
@@ -1403,7 +1403,7 @@ Expected: PASS (21 tests)
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/archeon/claims/why.py tests/test_why.py
+git add src/archaeon/claims/why.py tests/test_why.py
 git commit -m "feat(claims/why): why-claim synthesis with a copied code hypothesis"
 ```
 
@@ -1412,7 +1412,7 @@ git commit -m "feat(claims/why): why-claim synthesis with a copied code hypothes
 ### Task 8: Adversarial why-claim verification
 
 **Files:**
-- Modify: `src/archeon/claims/why.py`
+- Modify: `src/archaeon/claims/why.py`
 - Test: `tests/test_why.py`
 
 **Interfaces:**
@@ -1426,7 +1426,7 @@ git commit -m "feat(claims/why): why-claim synthesis with a copied code hypothes
 Append to `tests/test_why.py`:
 
 ```python
-from archeon.claims.why import verify_why_claims
+from archaeon.claims.why import verify_why_claims
 
 
 def _corroborated(cid="WHY-0001"):
@@ -1516,7 +1516,7 @@ Expected: FAIL with `ImportError: cannot import name 'verify_why_claims'`
 
 - [ ] **Step 3: Write minimal implementation**
 
-Add to `src/archeon/claims/why.py`:
+Add to `src/archaeon/claims/why.py`:
 
 ```python
 WHY_VERIFY_SYSTEM = (
@@ -1600,7 +1600,7 @@ Expected: PASS — the new verification path must not disturb `recover.verify_cl
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/archeon/claims/why.py tests/test_why.py
+git add src/archaeon/claims/why.py tests/test_why.py
 git commit -m "feat(claims/why): adversarial verification that skips code-inferred claims"
 ```
 
@@ -1609,7 +1609,7 @@ git commit -m "feat(claims/why): adversarial verification that skips code-inferr
 ### Task 9: Corroborated precision metric
 
 **Files:**
-- Modify: `src/archeon/claims/claim_eval.py:18-51`
+- Modify: `src/archaeon/claims/claim_eval.py:18-51`
 - Test: `tests/test_claim_eval.py`
 
 **Interfaces:**
@@ -1623,8 +1623,8 @@ git commit -m "feat(claims/why): adversarial verification that skips code-inferr
 Append to `tests/test_claim_eval.py`:
 
 ```python
-from archeon.claims.claim_eval import evaluate_claims
-from archeon.claims.schema import Claim
+from archaeon.claims.claim_eval import evaluate_claims
+from archaeon.claims.schema import Claim
 
 
 def _why(cid, corroboration, status="machine_verified"):
@@ -1677,7 +1677,7 @@ Expected: FAIL with `KeyError: 'corroborated_n'`
 
 - [ ] **Step 3: Write minimal implementation**
 
-In `src/archeon/claims/claim_eval.py`, extend the `setdefault` initialiser:
+In `src/archaeon/claims/claim_eval.py`, extend the `setdefault` initialiser:
 
 ```python
         s = by_layer.setdefault(c.layer, {"n": 0, "correct": 0,
@@ -1725,7 +1725,7 @@ Expected: PASS
 
 - [ ] **Step 5: Surface the new numbers in the CLI**
 
-In `src/archeon/cli.py`'s `cli_claims_eval`, change the gate constants line (currently `PRE_GATE, POST_GATE = 0.85, 0.95` at `cli.py:330`) to add the why-layer gate:
+In `src/archaeon/cli.py`'s `cli_claims_eval`, change the gate constants line (currently `PRE_GATE, POST_GATE = 0.85, 0.95` at `cli.py:330`) to add the why-layer gate:
 
 ```python
     PRE_GATE, POST_GATE, CORROBORATED_GATE = 0.85, 0.95, 0.80
@@ -1753,16 +1753,16 @@ Expected: PASS
 - [ ] **Step 7: Commit**
 
 ```bash
-git add src/archeon/claims/claim_eval.py src/archeon/cli.py tests/test_claim_eval.py
+git add src/archaeon/claims/claim_eval.py src/archaeon/cli.py tests/test_claim_eval.py
 git commit -m "feat(claim-eval): corroborated why-layer precision for the P1 gate"
 ```
 
 ---
 
-### Task 10: `archeon why` command
+### Task 10: `archaeon why` command
 
 **Files:**
-- Modify: `src/archeon/cli.py` (add after `cli_synthesize`, which ends at line 288)
+- Modify: `src/archaeon/cli.py` (add after `cli_synthesize`, which ends at line 288)
 - Test: `tests/test_cli.py`
 
 **Interfaces:**
@@ -1786,8 +1786,8 @@ import json
 import yaml
 from click.testing import CliRunner
 
-from archeon.cli import main
-from archeon.db import connect
+from archaeon.cli import main
+from archaeon.db import connect
 
 
 def _cfg(tmp_path, db_path, repo):
@@ -1879,7 +1879,7 @@ Expected: FAIL with `No such command 'why'`
 
 - [ ] **Step 3: Write minimal implementation**
 
-Add to `src/archeon/cli.py` after `cli_synthesize`:
+Add to `src/archaeon/cli.py` after `cli_synthesize`:
 
 ```python
 @main.command("why")
@@ -1896,14 +1896,14 @@ def cli_why(config_path, claims_dir, feature):
     synthesizes, mechanically grounds, and adversarially verifies the
     rationale. Run `synthesize` and the ingest commands first.
     """
-    from archeon.claims.pin import pin_claims
-    from archeon.claims.schema import load_claims, save_claims
-    from archeon.claims.why import (
+    from archaeon.claims.pin import pin_claims
+    from archaeon.claims.schema import load_claims, save_claims
+    from archaeon.claims.why import (
         WHY_SYNTH_SYSTEM, WHY_VERIFY_SYSTEM, ground_citations,
         synthesize_why_claims, verify_why_claims)
-    from archeon.claims.why_corpus import build_corpus, collect_artifacts
-    from archeon.cost import CostMeter
-    from archeon.llm import AgentClassifier
+    from archaeon.claims.why_corpus import build_corpus, collect_artifacts
+    from archaeon.cost import CostMeter
+    from archaeon.llm import AgentClassifier
 
     cfg, conn = _load(config_path)
     why_cfg = config_mod.why(cfg)
@@ -1996,8 +1996,8 @@ Expected: PASS, no regressions
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/archeon/cli.py tests/test_cli.py
-git commit -m "feat(cli): archeon why runs why-layer recovery with cost accounting"
+git add src/archaeon/cli.py tests/test_cli.py
+git commit -m "feat(cli): archaeon why runs why-layer recovery with cost accounting"
 ```
 
 ---
@@ -2024,11 +2024,11 @@ that shaped it, resolves those to their PRs and tickets, and uses those
 artifacts as corroborating evidence. It needs the artifact ingest commands to
 have run, not just `scan`:
 
-    uv run archeon ingest-git
-    uv run archeon ingest-prs
-    uv run archeon ingest-jira
-    uv run archeon synthesize --all-clusters --out claims
-    uv run archeon why --claims claims
+    uv run archaeon ingest-git
+    uv run archaeon ingest-prs
+    uv run archaeon ingest-jira
+    uv run archaeon synthesize --all-clusters --out claims
+    uv run archaeon why --claims claims
     # writes WHY-*.yaml beside the CLM-*.yaml, plus why_cost.json
 
 Each why-claim cites at least one ticket or PR excerpt, and its quote is
@@ -2041,7 +2041,7 @@ auto-verified.
 Measure the gate (corroborated why-layer precision >= 0.80) by labeling the
 why-claims in a CSV (`claim_id,correct`) and reusing `claims-eval`:
 
-    uv run archeon claims-eval --claims claims --labels why_labels.csv
+    uv run archaeon claims-eval --claims claims --labels why_labels.csv
 
 Label the *rationale*, not whether the cited artifact exists — grounding
 already guarantees existence. A labels file containing only `WHY-` ids reports
@@ -2052,7 +2052,7 @@ Optional `[why]` config: `max_commits_per_span`, `token_budget`, `model`.
 
 - [ ] **Step 2: Verify the documented commands match the implementation**
 
-Run: `uv run archeon why --help`
+Run: `uv run archaeon why --help`
 Expected: help text lists `--config`, `--claims`, `--feature`
 
 - [ ] **Step 3: Commit**
@@ -2079,17 +2079,17 @@ git commit -m "docs(readme): why-layer Pass 2 runbook and gate"
 - [ ] **Step 1: Ingest artifacts into the scoped DB**
 
 ```bash
-uv run archeon ingest-git --config archeon.example.scoped.toml
+uv run archaeon ingest-git --config archaeon.example.scoped.toml
 ```
 
 Then PRs and Jira:
 
 ```bash
-uv run archeon ingest-prs --config archeon.example.scoped.toml
+uv run archaeon ingest-prs --config archaeon.example.scoped.toml
 ```
 
 ```bash
-uv run archeon ingest-jira --config archeon.example.scoped.toml
+uv run archaeon ingest-jira --config archaeon.example.scoped.toml
 ```
 
 - [ ] **Step 2: Confirm the lake is populated**
@@ -2103,13 +2103,13 @@ Expected: all three non-zero. If PRs or tickets are zero, stop — `why` will ha
 - [ ] **Step 3: Link commits to tickets**
 
 ```bash
-uv run archeon link --config archeon.example.scoped.toml
+uv run archaeon link --config archaeon.example.scoped.toml
 ```
 
 - [ ] **Step 4: Run the why stage**
 
 ```bash
-uv run archeon why --config archeon.example.scoped.toml --claims claims_scoped
+uv run archaeon why --config archaeon.example.scoped.toml --claims claims_scoped
 ```
 
 Record the printed counts and the cost block.
@@ -2129,7 +2129,7 @@ Judge only whether the stated rationale is true of the code and supported by the
 - [ ] **Step 6: Measure the gate**
 
 ```bash
-uv run archeon claims-eval --claims claims_scoped --labels why_labels.csv
+uv run archaeon claims-eval --claims claims_scoped --labels why_labels.csv
 ```
 
 Expected: a `why` layer block including `corroborated: <n>/<d> = <precision>`. The gate is ≥ 0.800.

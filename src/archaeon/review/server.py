@@ -5,9 +5,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from archeon.claims.schema import StaleClaimError, save_claim
-from archeon.db import connect_readonly
-from archeon.review import render, store
+from archaeon.claims.schema import StaleClaimError, save_claim
+from archaeon.db import connect_readonly
+from archaeon.review import render, store
 
 
 class ReviewIn(BaseModel):
@@ -18,7 +18,7 @@ class ReviewIn(BaseModel):
 
 def create_app(claims_dir, db=None) -> FastAPI:
     claims_dir = Path(claims_dir)
-    app = FastAPI(title="Archeon Review")
+    app = FastAPI(title="Archaeon Review")
 
     @contextmanager
     def db_conn():

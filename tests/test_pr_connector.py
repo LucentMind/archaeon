@@ -1,8 +1,8 @@
 import json
 
-from archeon.connectors import pr_connector
-from archeon.connectors.pr_connector import ingest_prs
-from archeon.db import connect
+from archaeon.connectors import pr_connector
+from archaeon.connectors.pr_connector import ingest_prs
+from archaeon.db import connect
 
 PR482 = {"number": 482, "title": "Add debounce", "body": "Fixes EMB-2",
          "user": {"login": "dev1"}, "head": {"ref": "feature/EMB-2-debounce"},

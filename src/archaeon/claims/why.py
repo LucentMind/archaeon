@@ -9,8 +9,8 @@ import json
 import re
 from dataclasses import replace
 
-from archeon.claims.recover import _confidence, _strip_fence
-from archeon.claims.schema import (
+from archaeon.claims.recover import _confidence, _strip_fence
+from archaeon.claims.schema import (
     CODE_INFERRED_MAX_CONFIDENCE, WHY_CLAIM_TYPES, Claim, Evidence)
 
 _WS = re.compile(r"\s+")

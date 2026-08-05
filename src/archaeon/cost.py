@@ -7,7 +7,7 @@ without the SDK installed and cannot drift with SDK imports.
 
 The dollar figures are normally **API-equivalent** — this project
 authenticates via the Claude CLI's subscription login (see
-``archeon.llm._cli_auth_env``), so nothing was actually billed to an API
+``archaeon.llm._cli_auth_env``), so nothing was actually billed to an API
 key. That claim only holds while nothing re-routes the spawned CLI, so it is
 probed at report time by ``billing_route_overridden``: if the environment
 routes it elsewhere, the billing route is reported as unknown rather than
@@ -27,7 +27,7 @@ UNKNOWN_NOTE = ("Cost as reported by the Claude Agent SDK. The billing "
                 "this cost may have been really billed.")
 
 # Env vars that route the spawned Claude CLI away from the subscription
-# login. ``archeon.llm._cli_auth_env`` strips only ANTHROPIC_API_KEY /
+# login. ``archaeon.llm._cli_auth_env`` strips only ANTHROPIC_API_KEY /
 # ANTHROPIC_AUTH_TOKEN, so these routes (and a Console/API-billed CLI login)
 # are invisible from here — hence "unknown", never "not billed".
 ROUTE_VARS = ("CLAUDE_CODE_USE_BEDROCK", "CLAUDE_CODE_USE_VERTEX",
@@ -62,7 +62,7 @@ def is_error_result(msg) -> bool:
 def is_terminal_result(msg) -> bool:
     """True for any terminal ResultMessage — costed either way.
 
-    The single source of truth for this classification: ``archeon.llm``
+    The single source of truth for this classification: ``archaeon.llm``
     gates both its recording and its result read on these helpers rather
     than re-deriving the subtype semantics.
     """

@@ -1,9 +1,9 @@
 import sqlite3
 from pathlib import Path, PurePosixPath
 
-from archeon.codegraph.clang_scan import clang_symbols
-from archeon.codegraph.edges import extract_edges
-from archeon.codegraph.ts_scan import C_SUFFIXES, CPP_SUFFIXES, ts_symbols
+from archaeon.codegraph.clang_scan import clang_symbols
+from archaeon.codegraph.edges import extract_edges
+from archaeon.codegraph.ts_scan import C_SUFFIXES, CPP_SUFFIXES, ts_symbols
 
 SOURCE_SUFFIXES = C_SUFFIXES | CPP_SUFFIXES | {".xc", ".s", ".asm"}
 

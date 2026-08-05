@@ -1,4 +1,4 @@
-# Archeon — Design Specification
+# Archaeon — Design Specification
 
 Date: 2026-07-23
 Status: draft for review
@@ -11,7 +11,7 @@ place the truth lives. Understanding expected behavior or the repercussions of a
 any engineer a long time, and regression risk stays high. The same failure runs across the
 whole chain from product requirement to testing.
 
-Archeon reverse-engineers the requirements and architecture decisions of an existing codebase
+Archaeon reverse-engineers the requirements and architecture decisions of an existing codebase
 from the code and its surrounding artifacts (git history, Jira tickets, PR discussions, code
 comments, drifted wikis), represents that recovered knowledge simultaneously for humans
 (visual, reviewable) and machines (queryable by AI agents), and uses it to detect gaps,

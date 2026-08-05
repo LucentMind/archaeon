@@ -1,8 +1,8 @@
 import json
 
-from archeon.retrieval import cluster as cluster_mod
-from archeon.db import connect
-from archeon import config as config_mod
+from archaeon.retrieval import cluster as cluster_mod
+from archaeon.db import connect
+from archaeon import config as config_mod
 
 
 def _insert(conn, name, path, line, end_line):

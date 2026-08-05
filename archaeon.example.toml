@@ -11,7 +11,7 @@ compile_db_dir = "C:/work/monorepo/build"   # optional
 
 [jira]
 base_url = "https://jira.internal.example"
-# Tickets are fetched BY KEY: Archeon discovers the ticket keys referenced by
+# Tickets are fetched BY KEY: Archaeon discovers the ticket keys referenced by
 # this component's commits/PRs/branches and pulls only those. So just list every
 # project prefix that can appear — even 11+ projects across the monorepo; they
 # are never bulk-fetched. (Run ingest-git and ingest-prs before ingest-jira.)

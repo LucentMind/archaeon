@@ -1,5 +1,5 @@
-from archeon.connectors.wiki_connector import ingest_wiki_export
-from archeon.db import connect
+from archaeon.connectors.wiki_connector import ingest_wiki_export
+from archaeon.db import connect
 
 HTML = """<html><head><title>Thermal design</title>
 <style>p { color: red }</style></head>

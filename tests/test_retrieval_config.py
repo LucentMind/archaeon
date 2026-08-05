@@ -1,4 +1,4 @@
-from archeon import config as config_mod
+from archaeon import config as config_mod
 
 
 def test_retrieval_defaults_when_absent():

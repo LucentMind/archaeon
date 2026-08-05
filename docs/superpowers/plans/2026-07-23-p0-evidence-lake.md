@@ -1,10 +1,10 @@
-# Archeon P0 — Evidence Lake Implementation Plan
+# Archaeon P0 — Evidence Lake Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build the deterministic evidence lake for one golden component — git/Jira/PR/wiki connectors, C/C++ code graph (clang with tree-sitter fallback), change-coupling stats, and issue↔commit link recovery with a measurable precision/recall harness.
 
-**Architecture:** A Python package `archeon` with a SQLite evidence database. Connectors normalize external sources into typed tables; analysis modules (coupling, link heuristics, LLM link recovery) read and write the same DB; a `click` CLI wires the stages. No LLM anywhere except the final link-recovery stage (Haiku, mockable client).
+**Architecture:** A Python package `archaeon` with a SQLite evidence database. Connectors normalize external sources into typed tables; analysis modules (coupling, link heuristics, LLM link recovery) read and write the same DB; a `click` CLI wires the stages. No LLM anywhere except the final link-recovery stage (Haiku, mockable client).
 
 **Tech Stack:** Python ≥3.12, uv, pytest, sqlite3 (stdlib), click, requests, tree-sitter (+ tree-sitter-c, tree-sitter-cpp), libclang (pip wheel, bundles the DLL), anthropic.
 
@@ -16,7 +16,7 @@
 - Per spec §6: all processing is scoped to one component (config-driven path filters).
 - LLM link confidence is stored per link (`method`, `confidence` columns); heuristic key-regex links get confidence 1.0, LLM links 0.7.
 - Secrets (Jira/GitHub tokens, Anthropic key) come from environment variables only, never config files.
-- All new code lives under `src/archeon/`, tests under `tests/`, mirroring module names.
+- All new code lives under `src/archaeon/`, tests under `tests/`, mirroring module names.
 - Windows is the dev platform: no shell-outs except `git`; paths via `pathlib`.
 
 ---
@@ -25,14 +25,14 @@
 
 **Files:**
 - Create: `pyproject.toml`
-- Create: `src/archeon/__init__.py`
-- Create: `src/archeon/db.py`
-- Create: `src/archeon/schema.sql`
+- Create: `src/archaeon/__init__.py`
+- Create: `src/archaeon/db.py`
+- Create: `src/archaeon/schema.sql`
 - Create: `tests/test_db.py`
 - Create: `.gitignore`
 
 **Interfaces:**
-- Produces: `archeon.db.connect(path: str | Path) -> sqlite3.Connection` — opens/creates the DB, applies `schema.sql` (idempotent), `row_factory = sqlite3.Row`, foreign keys ON. All later tasks call this.
+- Produces: `archaeon.db.connect(path: str | Path) -> sqlite3.Connection` — opens/creates the DB, applies `schema.sql` (idempotent), `row_factory = sqlite3.Row`, foreign keys ON. All later tasks call this.
 - Produces: tables `commits, commit_files, tickets, prs, pr_comments, wiki_pages, symbols, scan_gaps, coupling, links`.
 
 - [ ] **Step 1: Write pyproject and gitignore**
@@ -41,7 +41,7 @@
 
 ```toml
 [project]
-name = "archeon"
+name = "archaeon"
 version = "0.1.0"
 description = "Evidence lake: recover requirements evidence from code and artifacts"
 requires-python = ">=3.12"
@@ -59,14 +59,14 @@ dependencies = [
 dev = ["pytest>=8"]
 
 [project.scripts]
-archeon = "archeon.cli:main"
+archaeon = "archaeon.cli:main"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/archeon"]
+packages = ["src/archaeon"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -89,7 +89,7 @@ Run: `uv sync` — expected: resolves and installs without error.
 `tests/test_db.py`:
 
 ```python
-from archeon.db import connect
+from archaeon.db import connect
 
 
 def test_connect_creates_schema(tmp_path):
@@ -117,13 +117,13 @@ def test_connect_is_idempotent_and_persists(tmp_path):
 - [ ] **Step 3: Run test to verify it fails**
 
 Run: `uv run pytest tests/test_db.py -v`
-Expected: FAIL with `ModuleNotFoundError: No module named 'archeon'` (or ImportError on `connect`).
+Expected: FAIL with `ModuleNotFoundError: No module named 'archaeon'` (or ImportError on `connect`).
 
 - [ ] **Step 4: Write the implementation**
 
-`src/archeon/__init__.py`: empty file.
+`src/archaeon/__init__.py`: empty file.
 
-`src/archeon/schema.sql`:
+`src/archaeon/schema.sql`:
 
 ```sql
 CREATE TABLE IF NOT EXISTS commits(
@@ -203,7 +203,7 @@ CREATE TABLE IF NOT EXISTS links(
 );
 ```
 
-`src/archeon/db.py`:
+`src/archaeon/db.py`:
 
 ```python
 import sqlite3
@@ -215,7 +215,7 @@ def connect(path: str | Path) -> sqlite3.Connection:
     conn = sqlite3.connect(str(path))
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
-    schema = resources.files("archeon").joinpath("schema.sql").read_text()
+    schema = resources.files("archaeon").joinpath("schema.sql").read_text()
     conn.executescript(schema)
     conn.commit()
     return conn
@@ -229,7 +229,7 @@ Expected: 2 PASSED. (If `schema.sql` isn't found, add `[tool.hatch.build.targets
 - [ ] **Step 6: Commit**
 
 ```bash
-git add pyproject.toml .gitignore src/archeon tests
+git add pyproject.toml .gitignore src/archaeon tests
 git commit -m "feat: project scaffold and evidence DB schema"
 ```
 
@@ -238,12 +238,12 @@ git commit -m "feat: project scaffold and evidence DB schema"
 ### Task 2: Git connector
 
 **Files:**
-- Create: `src/archeon/connectors/__init__.py`
-- Create: `src/archeon/connectors/git_connector.py`
+- Create: `src/archaeon/connectors/__init__.py`
+- Create: `src/archaeon/connectors/git_connector.py`
 - Create: `tests/test_git_connector.py`
 
 **Interfaces:**
-- Consumes: `archeon.db.connect`.
+- Consumes: `archaeon.db.connect`.
 - Produces: `ingest_git(conn, repo_path: Path, path_prefixes: list[str] | None = None) -> int` — parses `git log` of the repo, inserts into `commits` and `commit_files` (paths filtered by any of `path_prefixes` if given; a commit is kept if it touches at least one matching file, and only matching files are stored). Returns number of commits inserted. Idempotent via `INSERT OR REPLACE`.
 
 - [ ] **Step 1: Write the failing test**
@@ -254,8 +254,8 @@ git commit -m "feat: project scaffold and evidence DB schema"
 import subprocess
 from pathlib import Path
 
-from archeon.connectors.git_connector import ingest_git
-from archeon.db import connect
+from archaeon.connectors.git_connector import ingest_git
+from archaeon.db import connect
 
 
 def _git(repo: Path, *args: str) -> None:
@@ -305,13 +305,13 @@ def test_path_prefix_filter(tmp_path):
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `uv run pytest tests/test_git_connector.py -v`
-Expected: FAIL with `ModuleNotFoundError` on `archeon.connectors.git_connector`.
+Expected: FAIL with `ModuleNotFoundError` on `archaeon.connectors.git_connector`.
 
 - [ ] **Step 3: Write the implementation**
 
-`src/archeon/connectors/__init__.py`: empty file.
+`src/archaeon/connectors/__init__.py`: empty file.
 
-`src/archeon/connectors/git_connector.py`:
+`src/archaeon/connectors/git_connector.py`:
 
 ```python
 import sqlite3
@@ -372,7 +372,7 @@ Expected: 2 PASSED.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/archeon/connectors tests/test_git_connector.py
+git add src/archaeon/connectors tests/test_git_connector.py
 git commit -m "feat: git connector ingesting commits and touched files"
 ```
 
@@ -381,11 +381,11 @@ git commit -m "feat: git connector ingesting commits and touched files"
 ### Task 3: Jira connector
 
 **Files:**
-- Create: `src/archeon/connectors/jira_connector.py`
+- Create: `src/archaeon/connectors/jira_connector.py`
 - Create: `tests/test_jira_connector.py`
 
 **Interfaces:**
-- Consumes: `archeon.db.connect`.
+- Consumes: `archaeon.db.connect`.
 - Produces: `ingest_jira(conn, base_url: str, jql: str, token: str, fetch=None) -> int` — pages through Jira REST `search`, inserts into `tickets`, returns count. `fetch(url, params, token) -> dict` is injectable; default implementation uses `requests` with bearer auth. Tests never hit the network.
 
 - [ ] **Step 1: Write the failing test**
@@ -393,8 +393,8 @@ git commit -m "feat: git connector ingesting commits and touched files"
 `tests/test_jira_connector.py`:
 
 ```python
-from archeon.connectors.jira_connector import ingest_jira
-from archeon.db import connect
+from archaeon.connectors.jira_connector import ingest_jira
+from archaeon.db import connect
 
 PAGE1 = {
     "startAt": 0, "maxResults": 1, "total": 2,
@@ -441,7 +441,7 @@ Expected: FAIL with `ModuleNotFoundError` on `jira_connector`.
 
 - [ ] **Step 3: Write the implementation**
 
-`src/archeon/connectors/jira_connector.py`:
+`src/archaeon/connectors/jira_connector.py`:
 
 ```python
 import sqlite3
@@ -490,7 +490,7 @@ Expected: 1 PASSED.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/archeon/connectors/jira_connector.py tests/test_jira_connector.py
+git add src/archaeon/connectors/jira_connector.py tests/test_jira_connector.py
 git commit -m "feat: jira connector with injectable fetcher"
 ```
 
@@ -499,11 +499,11 @@ git commit -m "feat: jira connector with injectable fetcher"
 ### Task 4: Pull-request connector (GitHub-style REST)
 
 **Files:**
-- Create: `src/archeon/connectors/pr_connector.py`
+- Create: `src/archaeon/connectors/pr_connector.py`
 - Create: `tests/test_pr_connector.py`
 
 **Interfaces:**
-- Consumes: `archeon.db.connect`.
+- Consumes: `archaeon.db.connect`.
 - Produces: `ingest_prs(conn, api_base: str, repo: str, token: str, fetch=None) -> int` — pages through merged PRs and their review comments, fills `prs` and `pr_comments`, returns PR count. `fetch(url, params, token) -> list[dict]` injectable; default uses `requests`. Other git hosts become future connector plugins with the same table contract.
 
 - [ ] **Step 1: Write the failing test**
@@ -511,8 +511,8 @@ git commit -m "feat: jira connector with injectable fetcher"
 `tests/test_pr_connector.py`:
 
 ```python
-from archeon.connectors.pr_connector import ingest_prs
-from archeon.db import connect
+from archaeon.connectors.pr_connector import ingest_prs
+from archaeon.db import connect
 
 PRS = [{"number": 482, "title": "Add debounce",
         "body": "Fixes EMB-2", "user": {"login": "dev1"},
@@ -552,7 +552,7 @@ Expected: FAIL with `ModuleNotFoundError` on `pr_connector`.
 
 - [ ] **Step 3: Write the implementation**
 
-`src/archeon/connectors/pr_connector.py`:
+`src/archaeon/connectors/pr_connector.py`:
 
 ```python
 import sqlite3
@@ -614,7 +614,7 @@ Expected: 1 PASSED.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/archeon/connectors/pr_connector.py tests/test_pr_connector.py
+git add src/archaeon/connectors/pr_connector.py tests/test_pr_connector.py
 git commit -m "feat: PR connector for merged PRs and review comments"
 ```
 
@@ -623,11 +623,11 @@ git commit -m "feat: PR connector for merged PRs and review comments"
 ### Task 5: Confluence export connector
 
 **Files:**
-- Create: `src/archeon/connectors/wiki_connector.py`
+- Create: `src/archaeon/connectors/wiki_connector.py`
 - Create: `tests/test_wiki_connector.py`
 
 **Interfaces:**
-- Consumes: `archeon.db.connect`.
+- Consumes: `archaeon.db.connect`.
 - Produces: `ingest_wiki_export(conn, export_dir: Path) -> int` — walks a Confluence HTML space export directory, extracts `<title>` and visible text from each `.html` file (stdlib `HTMLParser`, scripts/styles stripped), inserts into `wiki_pages` (id = filename stem), returns page count.
 
 - [ ] **Step 1: Write the failing test**
@@ -635,8 +635,8 @@ git commit -m "feat: PR connector for merged PRs and review comments"
 `tests/test_wiki_connector.py`:
 
 ```python
-from archeon.connectors.wiki_connector import ingest_wiki_export
-from archeon.db import connect
+from archaeon.connectors.wiki_connector import ingest_wiki_export
+from archaeon.db import connect
 
 HTML = """<html><head><title>Thermal design</title>
 <style>p { color: red }</style></head>
@@ -667,7 +667,7 @@ Expected: FAIL with `ModuleNotFoundError` on `wiki_connector`.
 
 - [ ] **Step 3: Write the implementation**
 
-`src/archeon/connectors/wiki_connector.py`:
+`src/archaeon/connectors/wiki_connector.py`:
 
 ```python
 import sqlite3
@@ -728,7 +728,7 @@ Expected: 1 PASSED.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/archeon/connectors/wiki_connector.py tests/test_wiki_connector.py
+git add src/archaeon/connectors/wiki_connector.py tests/test_wiki_connector.py
 git commit -m "feat: confluence HTML export connector"
 ```
 
@@ -737,8 +737,8 @@ git commit -m "feat: confluence HTML export connector"
 ### Task 6: Heuristic link extraction
 
 **Files:**
-- Create: `src/archeon/analysis/__init__.py`
-- Create: `src/archeon/analysis/link_heuristics.py`
+- Create: `src/archaeon/analysis/__init__.py`
+- Create: `src/archaeon/analysis/link_heuristics.py`
 - Create: `tests/test_link_heuristics.py`
 
 **Interfaces:**
@@ -755,8 +755,8 @@ git commit -m "feat: confluence HTML export connector"
 `tests/test_link_heuristics.py`:
 
 ```python
-from archeon.analysis.link_heuristics import extract_heuristic_links
-from archeon.db import connect
+from archaeon.analysis.link_heuristics import extract_heuristic_links
+from archaeon.db import connect
 
 
 def _seed(conn):
@@ -794,9 +794,9 @@ Expected: FAIL with `ModuleNotFoundError` on `link_heuristics`.
 
 - [ ] **Step 3: Write the implementation**
 
-`src/archeon/analysis/__init__.py`: empty file.
+`src/archaeon/analysis/__init__.py`: empty file.
 
-`src/archeon/analysis/link_heuristics.py`:
+`src/archaeon/analysis/link_heuristics.py`:
 
 ```python
 import re
@@ -846,7 +846,7 @@ Expected: 1 PASSED.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/archeon/analysis tests/test_link_heuristics.py
+git add src/archaeon/analysis tests/test_link_heuristics.py
 git commit -m "feat: heuristic commit/PR/ticket link extraction"
 ```
 
@@ -855,7 +855,7 @@ git commit -m "feat: heuristic commit/PR/ticket link extraction"
 ### Task 7: Change-coupling analysis
 
 **Files:**
-- Create: `src/archeon/analysis/coupling.py`
+- Create: `src/archaeon/analysis/coupling.py`
 - Create: `tests/test_coupling.py`
 
 **Interfaces:**
@@ -868,8 +868,8 @@ git commit -m "feat: heuristic commit/PR/ticket link extraction"
 `tests/test_coupling.py`:
 
 ```python
-from archeon.analysis.coupling import compute_coupling, strongest_pairs
-from archeon.db import connect
+from archaeon.analysis.coupling import compute_coupling, strongest_pairs
+from archaeon.db import connect
 
 
 def _seed(conn):
@@ -916,7 +916,7 @@ Expected: FAIL with `ModuleNotFoundError` on `coupling`.
 
 - [ ] **Step 3: Write the implementation**
 
-`src/archeon/analysis/coupling.py`:
+`src/archaeon/analysis/coupling.py`:
 
 ```python
 import sqlite3
@@ -963,7 +963,7 @@ Expected: 2 PASSED.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/archeon/analysis/coupling.py tests/test_coupling.py
+git add src/archaeon/analysis/coupling.py tests/test_coupling.py
 git commit -m "feat: change-coupling analysis over commit history"
 ```
 
@@ -972,16 +972,16 @@ git commit -m "feat: change-coupling analysis over commit history"
 ### Task 8: Code graph — tree-sitter scan with clang upgrade and gap recording
 
 **Files:**
-- Create: `src/archeon/codegraph/__init__.py`
-- Create: `src/archeon/codegraph/ts_scan.py`
-- Create: `src/archeon/codegraph/clang_scan.py`
-- Create: `src/archeon/codegraph/scan.py`
+- Create: `src/archaeon/codegraph/__init__.py`
+- Create: `src/archaeon/codegraph/ts_scan.py`
+- Create: `src/archaeon/codegraph/clang_scan.py`
+- Create: `src/archaeon/codegraph/scan.py`
 - Create: `tests/test_ts_scan.py`
 - Create: `tests/test_clang_scan.py`
 - Create: `tests/test_scan_merge.py`
 
 **Interfaces:**
-- Consumes: `archeon.db.connect`.
+- Consumes: `archaeon.db.connect`.
 - Produces (ts_scan): `ts_symbols(path: Path) -> list[dict]` — dicts `{name, kind, line, end_line, signature}` for function definitions and struct declarations via tree-sitter (`.c/.h` → C grammar; `.cc/.cpp/.cxx/.hpp` → C++ grammar). Raises `ValueError` on other suffixes.
 - Produces (clang_scan): `clang_symbols(file_path: Path, compile_db_dir: Path) -> list[dict]` — same dict shape via libclang using `compile_commands.json`; raises `RuntimeError` if the file has no compile command or libclang fails.
 - Produces (scan): `scan_component(conn, root: Path, path_prefixes: list[str], compile_db_dir: Path | None) -> dict` — walks source files under the prefixes; tries clang first (when a compile DB is given), falls back to tree-sitter, records failures in `scan_gaps` with a reason; writes `symbols` rows with `source` column `'clang'` or `'tree-sitter'`; returns `{"clang": n1, "tree_sitter": n2, "gaps": n3}` (file counts). Re-runs clear previous `symbols`/`scan_gaps` for the scanned prefixes first.
@@ -993,7 +993,7 @@ git commit -m "feat: change-coupling analysis over commit history"
 ```python
 from pathlib import Path
 
-from archeon.codegraph.ts_scan import ts_symbols
+from archaeon.codegraph.ts_scan import ts_symbols
 
 C_SRC = """
 struct motor_state { int temp; };
@@ -1024,9 +1024,9 @@ Expected: FAIL with `ModuleNotFoundError` on `ts_scan`.
 
 - [ ] **Step 3: Implement tree-sitter scan**
 
-`src/archeon/codegraph/__init__.py`: empty file.
+`src/archaeon/codegraph/__init__.py`: empty file.
 
-`src/archeon/codegraph/ts_scan.py`:
+`src/archaeon/codegraph/ts_scan.py`:
 
 ```python
 from pathlib import Path
@@ -1104,7 +1104,7 @@ import json
 
 import pytest
 
-from archeon.codegraph.clang_scan import clang_symbols
+from archaeon.codegraph.clang_scan import clang_symbols
 
 C_SRC = "int enter_state(int s) { return s; }\n"
 
@@ -1143,7 +1143,7 @@ Expected: FAIL with `ModuleNotFoundError` on `clang_scan`.
 
 - [ ] **Step 6: Implement clang scan**
 
-`src/archeon/codegraph/clang_scan.py`:
+`src/archaeon/codegraph/clang_scan.py`:
 
 ```python
 from pathlib import Path
@@ -1195,8 +1195,8 @@ Expected: 2 PASSED (or SKIPPED with a libclang-unavailable message — acceptabl
 `tests/test_scan_merge.py`:
 
 ```python
-from archeon.codegraph.scan import scan_component
-from archeon.db import connect
+from archaeon.codegraph.scan import scan_component
+from archaeon.db import connect
 
 GOOD = "int f(void) { return 1; }\n"
 
@@ -1237,14 +1237,14 @@ Expected: FAIL with `ModuleNotFoundError` on `scan`.
 
 - [ ] **Step 9: Implement the merged scan**
 
-`src/archeon/codegraph/scan.py`:
+`src/archaeon/codegraph/scan.py`:
 
 ```python
 import sqlite3
 from pathlib import Path
 
-from archeon.codegraph.clang_scan import clang_symbols
-from archeon.codegraph.ts_scan import C_SUFFIXES, CPP_SUFFIXES, ts_symbols
+from archaeon.codegraph.clang_scan import clang_symbols
+from archaeon.codegraph.ts_scan import C_SUFFIXES, CPP_SUFFIXES, ts_symbols
 
 SOURCE_SUFFIXES = C_SUFFIXES | CPP_SUFFIXES | {".xc", ".s", ".asm"}
 
@@ -1299,7 +1299,7 @@ Expected: all PASSED (clang tests may SKIP only where the native library truly c
 - [ ] **Step 11: Commit**
 
 ```bash
-git add src/archeon/codegraph tests/test_ts_scan.py tests/test_clang_scan.py tests/test_scan_merge.py
+git add src/archaeon/codegraph tests/test_ts_scan.py tests/test_clang_scan.py tests/test_scan_merge.py
 git commit -m "feat: C/C++ code graph with clang-first scan and gap recording"
 ```
 
@@ -1308,7 +1308,7 @@ git commit -m "feat: C/C++ code graph with clang-first scan and gap recording"
 ### Task 9: Link-recovery evaluation harness
 
 **Files:**
-- Create: `src/archeon/analysis/link_eval.py`
+- Create: `src/archaeon/analysis/link_eval.py`
 - Create: `tests/test_link_eval.py`
 
 **Interfaces:**
@@ -1321,8 +1321,8 @@ git commit -m "feat: C/C++ code graph with clang-first scan and gap recording"
 `tests/test_link_eval.py`:
 
 ```python
-from archeon.analysis.link_eval import evaluate, load_gold
-from archeon.db import connect
+from archaeon.analysis.link_eval import evaluate, load_gold
+from archaeon.db import connect
 
 GOLD_CSV = """sha,ticket_key
 c1,EMB-1
@@ -1375,7 +1375,7 @@ Expected: FAIL with `ModuleNotFoundError` on `link_eval`.
 
 - [ ] **Step 3: Write the implementation**
 
-`src/archeon/analysis/link_eval.py`:
+`src/archaeon/analysis/link_eval.py`:
 
 ```python
 import csv
@@ -1423,7 +1423,7 @@ Expected: 3 PASSED.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/archeon/analysis/link_eval.py tests/test_link_eval.py
+git add src/archaeon/analysis/link_eval.py tests/test_link_eval.py
 git commit -m "feat: link-recovery precision/recall evaluation harness"
 ```
 
@@ -1432,7 +1432,7 @@ git commit -m "feat: link-recovery precision/recall evaluation harness"
 ### Task 10: LLM link recovery (cheap tier)
 
 **Files:**
-- Create: `src/archeon/analysis/link_llm.py`
+- Create: `src/archaeon/analysis/link_llm.py`
 - Create: `tests/test_link_llm.py`
 
 **Interfaces:**
@@ -1445,8 +1445,8 @@ git commit -m "feat: link-recovery precision/recall evaluation harness"
 `tests/test_link_llm.py`:
 
 ```python
-from archeon.analysis.link_llm import candidate_tickets, recover_links
-from archeon.db import connect
+from archaeon.analysis.link_llm import candidate_tickets, recover_links
+from archaeon.db import connect
 
 
 class FakeResponse:
@@ -1525,7 +1525,7 @@ Expected: FAIL with `ModuleNotFoundError` on `link_llm`.
 
 - [ ] **Step 3: Write the implementation**
 
-`src/archeon/analysis/link_llm.py`:
+`src/archaeon/analysis/link_llm.py`:
 
 ```python
 import re
@@ -1602,7 +1602,7 @@ Expected: 3 PASSED.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/archeon/analysis/link_llm.py tests/test_link_llm.py
+git add src/archaeon/analysis/link_llm.py tests/test_link_llm.py
 git commit -m "feat: cheap-tier LLM link recovery for unlinked commits"
 ```
 
@@ -1611,17 +1611,17 @@ git commit -m "feat: cheap-tier LLM link recovery for unlinked commits"
 ### Task 11: Component config and CLI
 
 **Files:**
-- Create: `src/archeon/config.py`
-- Create: `src/archeon/cli.py`
+- Create: `src/archaeon/config.py`
+- Create: `src/archaeon/cli.py`
 - Create: `tests/test_cli.py`
 - Create: `README.md`
 
 **Interfaces:**
 - Consumes: everything above.
-- Produces: `archeon.config.load(path: Path) -> dict` — parses `archeon.toml` (stdlib `tomllib`) and validates required keys.
-- Produces: CLI `archeon` with commands `ingest-git`, `ingest-jira`, `ingest-prs`, `ingest-wiki`, `link`, `link-llm`, `coupling`, `scan`, `eval`, `stats` — each takes `--config archeon.toml` (default `./archeon.toml`) and operates on the DB named in config. Tokens from env vars `ARCHEON_JIRA_TOKEN`, `ARCHEON_GIT_TOKEN`, `ANTHROPIC_API_KEY`.
+- Produces: `archaeon.config.load(path: Path) -> dict` — parses `archaeon.toml` (stdlib `tomllib`) and validates required keys.
+- Produces: CLI `archaeon` with commands `ingest-git`, `ingest-jira`, `ingest-prs`, `ingest-wiki`, `link`, `link-llm`, `coupling`, `scan`, `eval`, `stats` — each takes `--config archaeon.toml` (default `./archaeon.toml`) and operates on the DB named in config. Tokens from env vars `ARCHAEON_JIRA_TOKEN`, `ARCHAEON_GIT_TOKEN`, `ANTHROPIC_API_KEY`.
 
-Example `archeon.toml` (documented in README):
+Example `archaeon.toml` (documented in README):
 
 ```toml
 [component]
@@ -1658,7 +1658,7 @@ from pathlib import Path
 
 from click.testing import CliRunner
 
-from archeon.cli import main
+from archaeon.cli import main
 
 
 def _git(repo: Path, *args: str) -> None:
@@ -1675,7 +1675,7 @@ def _setup(tmp_path: Path) -> Path:
     (repo / "src" / "a.c").write_text("int f(void) { return 1; }\n")
     _git(repo, "add", ".")
     _git(repo, "commit", "-m", "EMB-1: add f")
-    config = tmp_path / "archeon.toml"
+    config = tmp_path / "archaeon.toml"
     config.write_text(f"""
 [component]
 name = "demo"
@@ -1731,11 +1731,11 @@ def test_eval_command(tmp_path):
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `uv run pytest tests/test_cli.py -v`
-Expected: FAIL with `ModuleNotFoundError` on `archeon.cli`.
+Expected: FAIL with `ModuleNotFoundError` on `archaeon.cli`.
 
 - [ ] **Step 3: Write the implementation**
 
-`src/archeon/config.py`:
+`src/archaeon/config.py`:
 
 ```python
 import tomllib
@@ -1756,7 +1756,7 @@ def load(path: Path) -> dict:
     return config
 ```
 
-`src/archeon/cli.py`:
+`src/archaeon/cli.py`:
 
 ```python
 import os
@@ -1764,17 +1764,17 @@ from pathlib import Path
 
 import click
 
-from archeon import config as config_mod
-from archeon.analysis.coupling import compute_coupling, strongest_pairs
-from archeon.analysis.link_eval import evaluate, load_gold
-from archeon.analysis.link_heuristics import extract_heuristic_links
-from archeon.analysis.link_llm import recover_links
-from archeon.codegraph.scan import scan_component
-from archeon.connectors.git_connector import ingest_git
-from archeon.connectors.jira_connector import ingest_jira
-from archeon.connectors.pr_connector import ingest_prs
-from archeon.connectors.wiki_connector import ingest_wiki_export
-from archeon.db import connect
+from archaeon import config as config_mod
+from archaeon.analysis.coupling import compute_coupling, strongest_pairs
+from archaeon.analysis.link_eval import evaluate, load_gold
+from archaeon.analysis.link_heuristics import extract_heuristic_links
+from archaeon.analysis.link_llm import recover_links
+from archaeon.codegraph.scan import scan_component
+from archaeon.connectors.git_connector import ingest_git
+from archaeon.connectors.jira_connector import ingest_jira
+from archaeon.connectors.pr_connector import ingest_prs
+from archaeon.connectors.wiki_connector import ingest_wiki_export
+from archaeon.db import connect
 
 
 def _load(config_path: str):
@@ -1784,12 +1784,12 @@ def _load(config_path: str):
 
 
 config_option = click.option("--config", "config_path",
-                             default="archeon.toml", show_default=True)
+                             default="archaeon.toml", show_default=True)
 
 
 @click.group()
 def main():
-    """Archeon evidence lake."""
+    """Archaeon evidence lake."""
 
 
 @main.command("ingest-git")
@@ -1806,7 +1806,7 @@ def cli_ingest_git(config_path):
 def cli_ingest_jira(config_path):
     cfg, conn = _load(config_path)
     n = ingest_jira(conn, cfg["jira"]["base_url"], cfg["jira"]["jql"],
-                    os.environ["ARCHEON_JIRA_TOKEN"])
+                    os.environ["ARCHAEON_JIRA_TOKEN"])
     click.echo(f"tickets: {n}")
 
 
@@ -1815,7 +1815,7 @@ def cli_ingest_jira(config_path):
 def cli_ingest_prs(config_path):
     cfg, conn = _load(config_path)
     n = ingest_prs(conn, cfg["prs"]["api_base"], cfg["prs"]["repo"],
-                   os.environ["ARCHEON_GIT_TOKEN"])
+                   os.environ["ARCHAEON_GIT_TOKEN"])
     click.echo(f"prs: {n}")
 
 
@@ -1899,26 +1899,26 @@ def cli_stats(config_path):
 `README.md`:
 
 ```markdown
-# Archeon
+# Archaeon
 
 Evidence lake (P0): recovers requirements evidence from a codebase and its
-artifacts. See docs/superpowers/specs/2026-07-23-archeon-design.md.
+artifacts. See docs/superpowers/specs/2026-07-23-archaeon-design.md.
 
 ## Quickstart
 
     uv sync
-    cp archeon.example.toml archeon.toml   # edit paths and Jira/PR settings
-    set ARCHEON_JIRA_TOKEN=...             # or $env:ARCHEON_JIRA_TOKEN
-    set ARCHEON_GIT_TOKEN=...
-    uv run archeon ingest-git
-    uv run archeon ingest-jira
-    uv run archeon ingest-prs
-    uv run archeon ingest-wiki
-    uv run archeon scan
-    uv run archeon coupling
-    uv run archeon link
-    uv run archeon link-llm                # needs ANTHROPIC_API_KEY
-    uv run archeon stats
+    cp archaeon.example.toml archaeon.toml   # edit paths and Jira/PR settings
+    set ARCHAEON_JIRA_TOKEN=...             # or $env:ARCHAEON_JIRA_TOKEN
+    set ARCHAEON_GIT_TOKEN=...
+    uv run archaeon ingest-git
+    uv run archaeon ingest-jira
+    uv run archaeon ingest-prs
+    uv run archaeon ingest-wiki
+    uv run archaeon scan
+    uv run archaeon coupling
+    uv run archaeon link
+    uv run archaeon link-llm                # needs ANTHROPIC_API_KEY
+    uv run archaeon stats
 
 ## Measuring link-recovery quality (P0 exit metric)
 
@@ -1930,16 +1930,16 @@ Hand-label a random sample of commits into `gold.csv`:
 
 (empty ticket_key = commit genuinely has no ticket). Then:
 
-    uv run archeon eval --gold gold.csv                  # all methods
-    uv run archeon eval --gold gold.csv --method key_regex
-    uv run archeon eval --gold gold.csv --method llm
+    uv run archaeon eval --gold gold.csv                  # all methods
+    uv run archaeon eval --gold gold.csv --method key_regex
+    uv run archaeon eval --gold gold.csv --method llm
 
 ## Tests
 
     uv run pytest
 ```
 
-Also create `archeon.example.toml` with the example config from this task's header (copy it verbatim).
+Also create `archaeon.example.toml` with the example config from this task's header (copy it verbatim).
 
 - [ ] **Step 4: Run test to verify it passes**
 
@@ -1954,8 +1954,8 @@ Expected: all tests PASS (clang tests may SKIP only where the native library can
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/archeon/config.py src/archeon/cli.py tests/test_cli.py README.md archeon.example.toml
-git commit -m "feat: component config and archeon CLI"
+git add src/archaeon/config.py src/archaeon/cli.py tests/test_cli.py README.md archaeon.example.toml
+git commit -m "feat: component config and archaeon CLI"
 ```
 
 ---
@@ -1964,7 +1964,7 @@ git commit -m "feat: component config and archeon CLI"
 
 Not tasks for the executing engineer — this is what the plan's owner does with the built tool:
 
-1. Write `archeon.toml` for the golden component; run all `ingest-*`, `scan`, `coupling`, `link`.
+1. Write `archaeon.toml` for the golden component; run all `ingest-*`, `scan`, `coupling`, `link`.
 2. Hand-label ~100 randomly sampled commits into `gold.csv` (expect roughly half to have no ticket, per the research's ~42% linked baseline).
 3. Run `eval` for `key_regex` alone, then with `llm` included. Record precision/recall for both in `docs/research/` — this is the P0 deliverable that decides whether P1 synthesis has a good-enough evidence graph to stand on.
 4. Check `scan` gap count; unparsed files list becomes the input for analyzer improvements.

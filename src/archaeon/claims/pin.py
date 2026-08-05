@@ -2,7 +2,7 @@ import hashlib
 import re
 from pathlib import Path
 
-from archeon.connectors.git_connector import (
+from archaeon.connectors.git_connector import (
     blob_sha, head_sha, is_dirty, show_file)
 
 _REF_RE = re.compile(r"^(?P<path>.+):(?P<start>\d+)(?:-(?P<end>\d+))?$")

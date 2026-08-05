@@ -2,7 +2,7 @@ import sqlite3
 
 import pytest
 
-from archeon.db import connect, connect_readonly
+from archaeon.db import connect, connect_readonly
 
 
 def test_connect_creates_schema(tmp_path):
