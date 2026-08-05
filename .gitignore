@@ -1,0 +1,22 @@
+.venv/
+__pycache__/
+*.egg-info/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+.pytest_cache/
+
+# Generated run artifacts (scan/embed/cluster live in *.db above;
+# synthesize output + the standalone claims explorer are regenerable)
+claims_scoped/
+claims_scoped_explorer.html
+
+# Subagent-driven-development scratch (ledger, briefs, review packages)
+.superpowers/
+
+# Worktrees (native EnterWorktree placement)
+.claude/worktrees/
+
+# Secrets — never commit
+.env

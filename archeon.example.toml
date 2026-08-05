@@ -1,0 +1,48 @@
+[component]
+name = "motor_ctrl"
+db = "evidence.db"
+repo_path = "C:/work/monorepo"
+path_prefixes = ["src/motor_ctrl/"]
+compile_db_dir = "C:/work/monorepo/build"   # optional
+
+# [git]                                     # optional — these are the defaults
+# exclude_authors = ["dependabot[bot]", "renovate[bot]", "github-actions[bot]"]
+# exclude_message_patterns = ["^Bump .+ from .+ to .+"]
+
+[jira]
+base_url = "https://jira.internal.example"
+# Tickets are fetched BY KEY: Archeon discovers the ticket keys referenced by
+# this component's commits/PRs/branches and pulls only those. So just list every
+# project prefix that can appear — even 11+ projects across the monorepo; they
+# are never bulk-fetched. (Run ingest-git and ingest-prs before ingest-jira.)
+project_keys = ["EMB", "MOT", "PWR"]
+
+[prs]
+repo = "org/monorepo"
+# PRs are fetched via the GitHub CLI (`gh auth login` once) — no token needed.
+# hostname = "github.mycompany.com"   # only for GitHub Enterprise
+
+[wiki]
+export_dir = "C:/work/confluence_export"
+
+[llm]
+cheap_model = "claude-haiku-4-5-20251001"
+# expensive_model = "claude-sonnet-5"    # used by `synthesize` (falls back to cheap_model)
+max_commits = 200
+
+# [retrieval]                              # optional — these are the defaults
+# embed_model = "qwen3-embedding:4b"       # ":0.6b" for CI / low-resource
+# embed_endpoint = "http://localhost:11434"
+# embed_dims = 1024
+# token_budget = 60000                     # per-bundle token budget (heuristic)
+# w_references = 1.0                        # graph/embedding blend weights
+# w_includes = 0.5
+# w_coupling = 0.5
+# w_embedding = 1.0
+# sim_top_k = 10                           # embedding neighbours per symbol
+# max_cross_file_pairs = 400               # cap on file-level edge expansion
+
+# [why]                                    # optional — these are the defaults
+# max_commits_per_span = 50                # cap on git log -L archaeology per span
+# token_budget = 40000                     # artifact corpus budget per cluster
+# model = "claude-sonnet-5"                # falls back to llm.expensive_model

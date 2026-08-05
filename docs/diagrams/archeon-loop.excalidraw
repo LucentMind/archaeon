@@ -1,0 +1,885 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "mcp-excalidraw-server",
+  "elements": [
+    {
+      "id": "zoneA",
+      "type": "rectangle",
+      "x": 100,
+      "y": 110,
+      "width": 640,
+      "height": 580,
+      "backgroundColor": "#e7f5ff",
+      "strokeColor": "#1971c2",
+      "strokeWidth": 2,
+      "strokeStyle": "dashed",
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-05T08:00:57.680Z",
+      "updatedAt": "2026-08-05T08:00:57.680Z",
+      "version": 1
+    },
+    {
+      "id": "zoneB",
+      "type": "rectangle",
+      "x": 800,
+      "y": 110,
+      "width": 560,
+      "height": 580,
+      "backgroundColor": "#fff4e6",
+      "strokeColor": "#e8590c",
+      "strokeWidth": 2,
+      "strokeStyle": "dashed",
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-05T08:00:57.680Z",
+      "updatedAt": "2026-08-05T08:00:57.680Z",
+      "version": 1
+    },
+    {
+      "id": "title",
+      "type": "text",
+      "x": 100,
+      "y": 25,
+      "width": 320,
+      "height": 38,
+      "strokeColor": "#1e1e1e",
+      "text": "Archeon — the loop",
+      "fontSize": 30,
+      "fontFamily": 5,
+      "createdAt": "2026-08-05T08:00:57.680Z",
+      "updatedAt": "2026-08-05T08:00:57.680Z",
+      "version": 1
+    },
+    {
+      "id": "subtitle",
+      "type": "text",
+      "x": 100,
+      "y": 70,
+      "width": 560,
+      "height": 22,
+      "strokeColor": "#495057",
+      "text": "two pipelines · one claim store · a document that stays true",
+      "fontSize": 16,
+      "fontFamily": 2,
+      "createdAt": "2026-08-05T08:00:57.680Z",
+      "updatedAt": "2026-08-05T08:00:57.680Z",
+      "version": 1
+    },
+    {
+      "id": "zoneAlabel",
+      "type": "text",
+      "x": 122,
+      "y": 126,
+      "width": 470,
+      "height": 24,
+      "strokeColor": "#1971c2",
+      "text": "1 · FORWARD — the hot set (code that changes)",
+      "fontSize": 18,
+      "fontFamily": 2,
+      "createdAt": "2026-08-05T08:00:57.680Z",
+      "updatedAt": "2026-08-05T08:00:57.680Z",
+      "version": 1
+    },
+    {
+      "id": "zoneBlabel",
+      "type": "text",
+      "x": 822,
+      "y": 126,
+      "width": 440,
+      "height": 24,
+      "strokeColor": "#e8590c",
+      "text": "2 · ARCHEOLOGY — the cold set (code that doesn't)",
+      "fontSize": 18,
+      "fontFamily": 2,
+      "createdAt": "2026-08-05T08:00:57.680Z",
+      "updatedAt": "2026-08-05T08:00:57.680Z",
+      "version": 1
+    },
+    {
+      "id": "pr",
+      "type": "rectangle",
+      "x": 320,
+      "y": 172,
+      "width": 200,
+      "height": 60,
+      "backgroundColor": "#d0ebff",
+      "strokeColor": "#1971c2",
+      "strokeWidth": 2,
+      "label": {
+        "text": "Pull request"
+      },
+      "fontSize": 18,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-05T08:00:57.680Z",
+      "updatedAt": "2026-08-05T08:00:57.680Z",
+      "version": 1
+    },
+    {
+      "id": "cand",
+      "type": "rectangle",
+      "x": 225,
+      "y": 272,
+      "width": 390,
+      "height": 92,
+      "backgroundColor": "#d0ebff",
+      "strokeColor": "#1971c2",
+      "strokeWidth": 2,
+      "label": {
+        "text": "event → candidates\nsymbols · pinned spans · embeddings\nno LLM — the cost gate"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-05T08:00:57.680Z",
+      "updatedAt": "2026-08-05T08:03:07.823Z",
+      "version": 2
+    },
+    {
+      "id": "guard",
+      "type": "rectangle",
+      "x": 130,
+      "y": 412,
+      "width": 270,
+      "height": 95,
+      "backgroundColor": "#ffe3e3",
+      "strokeColor": "#e03131",
+      "strokeWidth": 2,
+      "label": {
+        "text": "guard  (pre-merge)\npropose → ground → refute\nnever writes · fails open"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-05T08:00:57.680Z",
+      "updatedAt": "2026-08-05T08:00:57.680Z",
+      "version": 1
+    },
+    {
+      "id": "absorb",
+      "type": "rectangle",
+      "x": 440,
+      "y": 412,
+      "width": 270,
+      "height": 95,
+      "backgroundColor": "#b2f2bb",
+      "strokeColor": "#2f9e44",
+      "strokeWidth": 2,
+      "label": {
+        "text": "absorb  (post-merge)\nsynthesize → why → reconcile\nthe only forward writer"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:00:57.681Z",
+      "version": 1
+    },
+    {
+      "id": "comment",
+      "type": "rectangle",
+      "x": 130,
+      "y": 562,
+      "width": 270,
+      "height": 76,
+      "backgroundColor": "#fff9db",
+      "strokeColor": "#f08c00",
+      "strokeWidth": 2,
+      "label": {
+        "text": "PR comment\nsilence is the safe output"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:00:57.681Z",
+      "version": 1
+    },
+    {
+      "id": "sources",
+      "type": "rectangle",
+      "x": 960,
+      "y": 172,
+      "width": 240,
+      "height": 60,
+      "backgroundColor": "#ffd8a8",
+      "strokeColor": "#e8590c",
+      "strokeWidth": 2,
+      "label": {
+        "text": "git · Jira · PRs · wiki"
+      },
+      "fontSize": 16,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:00:57.681Z",
+      "version": 1
+    },
+    {
+      "id": "lake",
+      "type": "rectangle",
+      "x": 960,
+      "y": 282,
+      "width": 240,
+      "height": 60,
+      "backgroundColor": "#ffd8a8",
+      "strokeColor": "#e8590c",
+      "strokeWidth": 2,
+      "label": {
+        "text": "evidence lake"
+      },
+      "fontSize": 16,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:00:57.681Z",
+      "version": 1
+    },
+    {
+      "id": "recover",
+      "type": "rectangle",
+      "x": 930,
+      "y": 392,
+      "width": 300,
+      "height": 88,
+      "backgroundColor": "#ffd8a8",
+      "strokeColor": "#e8590c",
+      "strokeWidth": 2,
+      "label": {
+        "text": "recover + why\nreconstruct from cold,\ndrifted artifacts"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:00:57.681Z",
+      "version": 1
+    },
+    {
+      "id": "recovered",
+      "type": "rectangle",
+      "x": 950,
+      "y": 532,
+      "width": 260,
+      "height": 76,
+      "backgroundColor": "#ffe8cc",
+      "strokeColor": "#e8590c",
+      "strokeWidth": 2,
+      "label": {
+        "text": "recovered claims\nnot yet witnessed"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:00:57.681Z",
+      "version": 1
+    },
+    {
+      "id": "store",
+      "type": "rectangle",
+      "x": 560,
+      "y": 780,
+      "width": 340,
+      "height": 106,
+      "backgroundColor": "#e5dbff",
+      "strokeColor": "#6741d9",
+      "strokeWidth": 3,
+      "label": {
+        "text": "CLAIM STORE\ngit repo · typed · evidence-cited\nthe living document"
+      },
+      "fontSize": 15,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:00:57.681Z",
+      "version": 1
+    },
+    {
+      "id": "docs",
+      "type": "rectangle",
+      "x": 150,
+      "y": 930,
+      "width": 320,
+      "height": 92,
+      "backgroundColor": "#eebefa",
+      "strokeColor": "#ae3ec9",
+      "strokeWidth": 2,
+      "label": {
+        "text": "requirements.md + ADRs\nGENERATED — edit claims,\nnot this file"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:00:57.681Z",
+      "version": 1
+    },
+    {
+      "id": "mcp",
+      "type": "rectangle",
+      "x": 570,
+      "y": 930,
+      "width": 320,
+      "height": 92,
+      "backgroundColor": "#c5f6fa",
+      "strokeColor": "#0c8599",
+      "strokeWidth": 2,
+      "label": {
+        "text": "MCP surface\nagents read claims,\nnot the markdown"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:00:57.681Z",
+      "version": 1
+    },
+    {
+      "id": "review",
+      "type": "rectangle",
+      "x": 990,
+      "y": 930,
+      "width": 320,
+      "height": 92,
+      "backgroundColor": "#ffdeeb",
+      "strokeColor": "#c2255c",
+      "strokeWidth": 2,
+      "label": {
+        "text": "Review UI\nexception-based\nadjudication"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:00:57.681Z",
+      "version": 1
+    },
+    {
+      "id": "msfssapriqnsodg5el",
+      "type": "arrow",
+      "x": 420,
+      "y": 240,
+      "strokeColor": "#1971c2",
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "start": {
+        "id": "pr"
+      },
+      "end": {
+        "id": "cand"
+      },
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:03:07.823Z",
+      "version": 2
+    },
+    {
+      "id": "msfssaprmdo9j06njag",
+      "type": "arrow",
+      "x": 363.70301086837065,
+      "y": 369.3937029814552,
+      "strokeColor": "#1971c2",
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -40.762912196105276,
+          37.212594037089616
+        ]
+      ],
+      "start": {
+        "id": "cand"
+      },
+      "end": {
+        "id": "guard"
+      },
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:03:07.823Z",
+      "version": 2
+    },
+    {
+      "id": "msfssapr5jnc2ul6qmg",
+      "type": "arrow",
+      "x": 476.29698913162935,
+      "y": 369.3937029814552,
+      "strokeColor": "#1971c2",
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          40.76291219610522,
+          37.212594037089616
+        ]
+      ],
+      "start": {
+        "id": "cand"
+      },
+      "end": {
+        "id": "absorb"
+      },
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:03:07.823Z",
+      "version": 2
+    },
+    {
+      "id": "msfssaprogae5r9152b",
+      "type": "arrow",
+      "x": 265,
+      "y": 515,
+      "strokeColor": "#e03131",
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          39
+        ]
+      ],
+      "start": {
+        "id": "guard"
+      },
+      "end": {
+        "id": "comment"
+      },
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:00:57.681Z",
+      "version": 1
+    },
+    {
+      "id": "msfssapr3q4ckcihact",
+      "type": "arrow",
+      "x": 1080,
+      "y": 240,
+      "strokeColor": "#e8590c",
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          34
+        ]
+      ],
+      "start": {
+        "id": "sources"
+      },
+      "end": {
+        "id": "lake"
+      },
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:00:57.681Z",
+      "version": 1
+    },
+    {
+      "id": "msfssaprjzrmuhp15bn",
+      "type": "arrow",
+      "x": 1080,
+      "y": 350,
+      "strokeColor": "#e8590c",
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          34
+        ]
+      ],
+      "start": {
+        "id": "lake"
+      },
+      "end": {
+        "id": "recover"
+      },
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:00:57.681Z",
+      "version": 1
+    },
+    {
+      "id": "msfssaprftsxvl2leo",
+      "type": "arrow",
+      "x": 1080,
+      "y": 488,
+      "strokeColor": "#e8590c",
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          36
+        ]
+      ],
+      "start": {
+        "id": "recover"
+      },
+      "end": {
+        "id": "recovered"
+      },
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:00:57.681Z",
+      "version": 1
+    },
+    {
+      "id": "msfssaprxdf6rnf5ic9",
+      "type": "arrow",
+      "x": 597.7785666145227,
+      "y": 514.3889976162855,
+      "strokeColor": "#2f9e44",
+      "strokeWidth": 3,
+      "label": {
+        "text": "witnessed"
+      },
+      "fontSize": 13,
+      "fontFamily": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          107.16040358487692,
+          258.2220047674291
+        ]
+      ],
+      "start": {
+        "id": "absorb"
+      },
+      "end": {
+        "id": "store"
+      },
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:00:57.681Z",
+      "version": 1
+    },
+    {
+      "id": "msfssapr7fqip3fidcr",
+      "type": "arrow",
+      "x": 566.762582132945,
+      "y": 888.5784541785449,
+      "strokeColor": "#6741d9",
+      "strokeWidth": 2,
+      "label": {
+        "text": "render"
+      },
+      "fontSize": 13,
+      "fontFamily": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -114.08460482533059,
+          38.84309164291017
+        ]
+      ],
+      "start": {
+        "id": "store"
+      },
+      "end": {
+        "id": "docs"
+      },
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:00:57.681Z",
+      "version": 1
+    },
+    {
+      "id": "msfssaprr1nec147ita",
+      "type": "arrow",
+      "x": 730,
+      "y": 894,
+      "strokeColor": "#6741d9",
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          28
+        ]
+      ],
+      "start": {
+        "id": "store"
+      },
+      "end": {
+        "id": "mcp"
+      },
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:00:57.681Z",
+      "version": 1
+    },
+    {
+      "id": "msfssapro2qt0ppi5lc",
+      "type": "arrow",
+      "x": 893.237417867055,
+      "y": 888.5784541785449,
+      "strokeColor": "#6741d9",
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          114.08460482533053,
+          38.84309164291017
+        ]
+      ],
+      "start": {
+        "id": "store"
+      },
+      "end": {
+        "id": "review"
+      },
+      "startArrowhead": "arrow",
+      "endArrowhead": "arrow",
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:00:57.681Z",
+      "version": 1
+    },
+    {
+      "id": "loopback",
+      "type": "arrow",
+      "x": 150,
+      "y": 976,
+      "width": 275,
+      "height": 776,
+      "strokeColor": "#6741d9",
+      "strokeWidth": 3,
+      "label": {
+        "text": "next change"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 2
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -105,
+          0
+        ],
+        [
+          -105,
+          -776
+        ],
+        [
+          170,
+          -776
+        ]
+      ],
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:00:57.681Z",
+      "version": 1
+    },
+    {
+      "id": "note1",
+      "type": "text",
+      "x": 140,
+      "y": 790,
+      "width": 390,
+      "height": 54,
+      "strokeColor": "#868e96",
+      "text": "self-healing: a recovered claim is promoted to\nwitnessed the first time a PR touches its span",
+      "fontSize": 14,
+      "fontFamily": 2,
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:00:57.681Z",
+      "version": 1
+    },
+    {
+      "id": "note2",
+      "type": "text",
+      "x": 1090,
+      "y": 714,
+      "width": 290,
+      "height": 54,
+      "strokeColor": "#868e96",
+      "text": "archeology never overwrites\na witnessed claim",
+      "fontSize": 14,
+      "fontFamily": 2,
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:03:07.822Z",
+      "version": 2
+    },
+    {
+      "id": "footer",
+      "type": "text",
+      "x": 150,
+      "y": 1080,
+      "width": 1150,
+      "height": 24,
+      "strokeColor": "#495057",
+      "text": "guard never writes  ·  absorb is idempotent  ·  nothing is ever deleted  ·  code alone can never justify \"must\"",
+      "fontSize": 15,
+      "fontFamily": 2,
+      "createdAt": "2026-08-05T08:00:57.681Z",
+      "updatedAt": "2026-08-05T08:00:57.681Z",
+      "version": 1
+    },
+    {
+      "id": "acceptArrow",
+      "type": "arrow",
+      "x": 356.1299661755754,
+      "y": 558.6975475881666,
+      "strokeColor": "#f08c00",
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          106.77921355632242,
+          -48.3950951763332
+        ]
+      ],
+      "start": {
+        "id": "comment"
+      },
+      "end": {
+        "id": "absorb"
+      },
+      "createdAt": "2026-08-05T08:03:07.818Z",
+      "updatedAt": "2026-08-05T08:03:07.818Z",
+      "version": 1
+    },
+    {
+      "id": "recArrow",
+      "type": "arrow",
+      "x": 1023.0340460283032,
+      "y": 612.8058454130178,
+      "strokeColor": "#e8590c",
+      "strokeWidth": 3,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -216.10611487029473,
+          162.38830917396444
+        ]
+      ],
+      "start": {
+        "id": "recovered"
+      },
+      "end": {
+        "id": "store"
+      },
+      "createdAt": "2026-08-05T08:03:07.818Z",
+      "updatedAt": "2026-08-05T08:03:07.818Z",
+      "version": 1
+    },
+    {
+      "id": "acceptLbl",
+      "type": "text",
+      "x": 406,
+      "y": 592,
+      "width": 150,
+      "height": 20,
+      "strokeColor": "#f08c00",
+      "text": "accept: <reason>",
+      "fontSize": 13,
+      "fontFamily": 2,
+      "createdAt": "2026-08-05T08:03:07.818Z",
+      "updatedAt": "2026-08-05T08:03:07.818Z",
+      "version": 1
+    },
+    {
+      "id": "recLbl",
+      "type": "text",
+      "x": 824,
+      "y": 648,
+      "width": 100,
+      "height": 20,
+      "strokeColor": "#e8590c",
+      "text": "recovered",
+      "fontSize": 13,
+      "fontFamily": 2,
+      "createdAt": "2026-08-05T08:03:07.818Z",
+      "updatedAt": "2026-08-05T08:03:52.275Z",
+      "version": 2
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff",
+    "gridSize": null
+  }
+}

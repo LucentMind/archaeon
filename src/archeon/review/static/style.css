@@ -1,0 +1,26 @@
+* { box-sizing: border-box; }
+body { margin: 0; font: 14px/1.4 system-ui, sans-serif; color: #1a1a1a; }
+header { padding: 8px 14px; background: #111; color: #fff; display: flex; gap: 16px; align-items: baseline; }
+header button { background: none; border: 1px solid #555; color: #ddd; padding: 4px 10px; cursor: pointer; }
+header button.active { background: #fff; color: #111; }
+#main { display: flex; }
+#nav { width: 320px; border-right: 1px solid #ddd; min-height: 90vh; padding: 8px; }
+#cards { flex: 1; padding: 12px; }
+.tile { display: block; width: 100%; text-align: left; border: 1px solid #ccc; margin: 4px 0; padding: 8px; cursor: pointer; background: #fafafa; }
+.tile .bar { height: 6px; display: flex; margin-top: 6px; }
+.bar .verified { background: #2e7d32; }
+.bar .contested { background: #ef6c00; }
+.bar .unrecovered { background: #9e9e9e; }
+.bar .rejected { background: #b71c1c; }
+.card { border: 1px solid #ccc; border-left: 6px solid #9e9e9e; padding: 10px; margin: 8px 0; }
+.card.focus { outline: 2px solid #1565c0; }
+.card.verified { border-left-color: #2e7d32; }
+.card.contested { border-left-color: #ef6c00; }
+.card.rejected { border-left-color: #b71c1c; }
+.card.broken { border-left-color: #000; background: #fff3f3; }
+.meta { color: #666; font-size: 12px; }
+.evidence { background: #f4f4f4; padding: 6px; margin-top: 6px; white-space: pre-wrap; font-family: ui-monospace, monospace; font-size: 12px; }
+.counter { color: #b71c1c; margin-top: 6px; }
+table.grammar { border-collapse: collapse; margin-top: 6px; }
+table.grammar td { border: 1px solid #ccc; padding: 2px 6px; }
+.hint { color: #888; font-size: 12px; }
