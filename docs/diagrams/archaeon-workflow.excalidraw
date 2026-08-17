@@ -1,0 +1,750 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "mcp-excalidraw-server",
+  "elements": [
+    {
+      "id": "z1",
+      "type": "rectangle",
+      "x": 140,
+      "y": 130,
+      "width": 980,
+      "height": 310,
+      "backgroundColor": "#e7f5ff",
+      "strokeColor": "#1971c2",
+      "strokeWidth": 2,
+      "strokeStyle": "dashed",
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-17T14:35:07.235Z",
+      "updatedAt": "2026-08-17T14:35:07.235Z",
+      "version": 1
+    },
+    {
+      "id": "z2",
+      "type": "rectangle",
+      "x": 140,
+      "y": 470,
+      "width": 980,
+      "height": 390,
+      "backgroundColor": "#ebfbee",
+      "strokeColor": "#2f9e44",
+      "strokeWidth": 2,
+      "strokeStyle": "dashed",
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-17T14:35:07.235Z",
+      "updatedAt": "2026-08-17T14:35:07.235Z",
+      "version": 1
+    },
+    {
+      "id": "z3",
+      "type": "rectangle",
+      "x": 140,
+      "y": 890,
+      "width": 980,
+      "height": 110,
+      "backgroundColor": "#fff0f6",
+      "strokeColor": "#c2255c",
+      "strokeWidth": 2,
+      "strokeStyle": "dashed",
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-17T14:35:07.235Z",
+      "updatedAt": "2026-08-17T14:35:07.235Z",
+      "version": 1
+    },
+    {
+      "id": "z4",
+      "type": "rectangle",
+      "x": 140,
+      "y": 1030,
+      "width": 980,
+      "height": 110,
+      "backgroundColor": "#fff9db",
+      "strokeColor": "#f08c00",
+      "strokeWidth": 2,
+      "strokeStyle": "dashed",
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-17T14:35:07.235Z",
+      "updatedAt": "2026-08-17T14:35:07.235Z",
+      "version": 1
+    },
+    {
+      "id": "title",
+      "type": "text",
+      "x": 140,
+      "y": 28,
+      "width": 620,
+      "height": 40,
+      "strokeColor": "#1e1e1e",
+      "text": "Archaeon — the recovery workflow",
+      "fontSize": 30,
+      "fontFamily": 5,
+      "createdAt": "2026-08-17T14:35:07.235Z",
+      "updatedAt": "2026-08-17T14:35:07.235Z",
+      "version": 1
+    },
+    {
+      "id": "sub",
+      "type": "text",
+      "x": 140,
+      "y": 74,
+      "width": 700,
+      "height": 22,
+      "strokeColor": "#495057",
+      "text": "from a codebase you inherited to reviewed, evidence-cited claims",
+      "fontSize": 16,
+      "fontFamily": 2,
+      "createdAt": "2026-08-17T14:35:07.235Z",
+      "updatedAt": "2026-08-17T14:35:07.235Z",
+      "version": 1
+    },
+    {
+      "id": "l1",
+      "type": "text",
+      "x": 162,
+      "y": 142,
+      "width": 200,
+      "height": 22,
+      "strokeColor": "#1971c2",
+      "text": "1 · EVIDENCE LAKE",
+      "fontSize": 17,
+      "fontFamily": 2,
+      "createdAt": "2026-08-17T14:35:07.235Z",
+      "updatedAt": "2026-08-17T14:36:44.059Z",
+      "version": 2,
+      "originalText": "1 · EVIDENCE LAKE"
+    },
+    {
+      "id": "l2",
+      "type": "text",
+      "x": 162,
+      "y": 482,
+      "width": 160,
+      "height": 22,
+      "strokeColor": "#2f9e44",
+      "text": "2 · RECOVERY",
+      "fontSize": 17,
+      "fontFamily": 2,
+      "createdAt": "2026-08-17T14:35:07.235Z",
+      "updatedAt": "2026-08-17T14:36:44.061Z",
+      "version": 2,
+      "originalText": "2 · RECOVERY"
+    },
+    {
+      "id": "l3",
+      "type": "text",
+      "x": 162,
+      "y": 900,
+      "width": 140,
+      "height": 22,
+      "strokeColor": "#c2255c",
+      "text": "3 · REVIEW",
+      "fontSize": 17,
+      "fontFamily": 2,
+      "createdAt": "2026-08-17T14:35:07.235Z",
+      "updatedAt": "2026-08-17T14:36:44.062Z",
+      "version": 2,
+      "originalText": "3 · REVIEW"
+    },
+    {
+      "id": "l4",
+      "type": "text",
+      "x": 162,
+      "y": 1040,
+      "width": 160,
+      "height": 22,
+      "strokeColor": "#f08c00",
+      "text": "4 · MAINTAIN",
+      "fontSize": 17,
+      "fontFamily": 2,
+      "createdAt": "2026-08-17T14:35:07.235Z",
+      "updatedAt": "2026-08-17T14:36:44.063Z",
+      "version": 2,
+      "originalText": "4 · MAINTAIN"
+    },
+    {
+      "id": "ingest",
+      "type": "rectangle",
+      "x": 200,
+      "y": 182,
+      "width": 480,
+      "height": 82,
+      "backgroundColor": "#d0ebff",
+      "strokeColor": "#1971c2",
+      "strokeWidth": 2,
+      "label": {
+        "text": "ingest-git · ingest-prs · ingest-jira · ingest-wiki\ngit is a scoped bulk pass; Jira and the wiki are\nfetched only by keys discovered from the code"
+      },
+      "fontSize": 13,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-17T14:35:07.236Z",
+      "updatedAt": "2026-08-17T14:35:07.236Z",
+      "version": 1
+    },
+    {
+      "id": "graph",
+      "type": "rectangle",
+      "x": 200,
+      "y": 300,
+      "width": 480,
+      "height": 82,
+      "backgroundColor": "#d0ebff",
+      "strokeColor": "#1971c2",
+      "strokeWidth": 2,
+      "label": {
+        "text": "scan · coupling · link · link-llm\ncode graph (clang, tree-sitter fallback),\nchange coupling, issue <-> commit links"
+      },
+      "fontSize": 13,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-17T14:35:07.236Z",
+      "updatedAt": "2026-08-17T14:36:44.065Z",
+      "version": 2
+    },
+    {
+      "id": "db",
+      "type": "rectangle",
+      "x": 760,
+      "y": 238,
+      "width": 320,
+      "height": 96,
+      "backgroundColor": "#e5dbff",
+      "strokeColor": "#6741d9",
+      "strokeWidth": 3,
+      "label": {
+        "text": "evidence.db\ncommits · PRs · tickets\nsymbols · edges · links"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-17T14:35:07.236Z",
+      "updatedAt": "2026-08-17T14:35:07.236Z",
+      "version": 1
+    },
+    {
+      "id": "cluster",
+      "type": "rectangle",
+      "x": 200,
+      "y": 522,
+      "width": 480,
+      "height": 70,
+      "backgroundColor": "#b2f2bb",
+      "strokeColor": "#2f9e44",
+      "strokeWidth": 2,
+      "label": {
+        "text": "embed · cluster\nlocal Ollama index; symbols → feature areas"
+      },
+      "fontSize": 13,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-17T14:35:07.236Z",
+      "updatedAt": "2026-08-17T14:35:07.236Z",
+      "version": 1
+    },
+    {
+      "id": "synth",
+      "type": "rectangle",
+      "x": 200,
+      "y": 630,
+      "width": 480,
+      "height": 82,
+      "backgroundColor": "#b2f2bb",
+      "strokeColor": "#2f9e44",
+      "strokeWidth": 2,
+      "label": {
+        "text": "synthesize\nwhat-layer claims, grounded in code —\nproposed, then adversarially verified"
+      },
+      "fontSize": 13,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-17T14:35:07.236Z",
+      "updatedAt": "2026-08-17T14:35:07.236Z",
+      "version": 1
+    },
+    {
+      "id": "why",
+      "type": "rectangle",
+      "x": 200,
+      "y": 748,
+      "width": 480,
+      "height": 82,
+      "backgroundColor": "#b2f2bb",
+      "strokeColor": "#2f9e44",
+      "strokeWidth": 2,
+      "label": {
+        "text": "why\nwhy-layer claims, from artifacts — citations\nchecked mechanically before any model judges"
+      },
+      "fontSize": 13,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-17T14:35:07.236Z",
+      "updatedAt": "2026-08-17T14:35:07.236Z",
+      "version": 1
+    },
+    {
+      "id": "claims",
+      "type": "rectangle",
+      "x": 760,
+      "y": 628,
+      "width": 320,
+      "height": 106,
+      "backgroundColor": "#e5dbff",
+      "strokeColor": "#6741d9",
+      "strokeWidth": 3,
+      "label": {
+        "text": "claims/\nCLM-*.yaml   what-layer\nWHY-*.yaml   why-layer\n+ run_cost.json"
+      },
+      "fontSize": 13,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-17T14:35:07.236Z",
+      "updatedAt": "2026-08-17T14:35:07.236Z",
+      "version": 1
+    },
+    {
+      "id": "review",
+      "type": "rectangle",
+      "x": 200,
+      "y": 918,
+      "width": 480,
+      "height": 72,
+      "backgroundColor": "#ffdeeb",
+      "strokeColor": "#c2255c",
+      "strokeWidth": 2,
+      "label": {
+        "text": "review\naccept / edit / reject — edits land in the YAML"
+      },
+      "fontSize": 13,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-17T14:35:07.236Z",
+      "updatedAt": "2026-08-17T14:36:44.066Z",
+      "version": 2
+    },
+    {
+      "id": "stale",
+      "type": "rectangle",
+      "x": 200,
+      "y": 1058,
+      "width": 480,
+      "height": 70,
+      "backgroundColor": "#ffec99",
+      "strokeColor": "#f08c00",
+      "strokeWidth": 2,
+      "label": {
+        "text": "check-staleness\nflags claims whose cited code drifted"
+      },
+      "fontSize": 13,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-17T14:35:07.236Z",
+      "updatedAt": "2026-08-17T14:36:44.068Z",
+      "version": 2
+    },
+    {
+      "id": "measure",
+      "type": "rectangle",
+      "x": 760,
+      "y": 918,
+      "width": 320,
+      "height": 64,
+      "backgroundColor": "#ffdeeb",
+      "strokeColor": "#c2255c",
+      "strokeWidth": 2,
+      "label": {
+        "text": "eval · claims-eval\nmeasure against hand labels"
+      },
+      "fontSize": 13,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-08-17T14:35:07.236Z",
+      "updatedAt": "2026-08-17T14:35:07.236Z",
+      "version": 1
+    },
+    {
+      "id": "msxc5er5kti365n3daq",
+      "type": "arrow",
+      "x": 440,
+      "y": 272,
+      "strokeColor": "#1971c2",
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          20
+        ]
+      ],
+      "start": {
+        "id": "ingest"
+      },
+      "end": {
+        "id": "graph"
+      },
+      "createdAt": "2026-08-17T14:35:07.236Z",
+      "updatedAt": "2026-08-17T14:35:07.236Z",
+      "version": 1
+    },
+    {
+      "id": "msxc5er58x69u9nsma3",
+      "type": "arrow",
+      "x": 687.9319714229168,
+      "y": 255.54107124925784,
+      "strokeColor": "#1971c2",
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          64.13605715416634,
+          8.417857501484349
+        ]
+      ],
+      "start": {
+        "id": "ingest"
+      },
+      "end": {
+        "id": "db"
+      },
+      "createdAt": "2026-08-17T14:35:07.236Z",
+      "updatedAt": "2026-08-17T14:35:07.236Z",
+      "version": 1
+    },
+    {
+      "id": "msxc5er5lfy7mdk4fl",
+      "type": "arrow",
+      "x": 687.947994183784,
+      "y": 312.58929233310806,
+      "strokeColor": "#1971c2",
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          64.10401163243205,
+          -7.345251332882754
+        ]
+      ],
+      "start": {
+        "id": "graph"
+      },
+      "end": {
+        "id": "db"
+      },
+      "createdAt": "2026-08-17T14:35:07.236Z",
+      "updatedAt": "2026-08-17T14:35:07.236Z",
+      "version": 1
+    },
+    {
+      "id": "msxc5er51s92uq1tz21",
+      "type": "arrow",
+      "x": 828.0151557724616,
+      "y": 337.93310997013106,
+      "strokeColor": "#6741d9",
+      "strokeWidth": 3,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -319.0561418032258,
+          180.13378005973783
+        ]
+      ],
+      "start": {
+        "id": "db"
+      },
+      "end": {
+        "id": "cluster"
+      },
+      "createdAt": "2026-08-17T14:35:07.236Z",
+      "updatedAt": "2026-08-17T14:35:07.236Z",
+      "version": 1
+    },
+    {
+      "id": "msxc5er5x3x9d9yh8qm",
+      "type": "arrow",
+      "x": 440,
+      "y": 600,
+      "strokeColor": "#2f9e44",
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          22
+        ]
+      ],
+      "start": {
+        "id": "cluster"
+      },
+      "end": {
+        "id": "synth"
+      },
+      "createdAt": "2026-08-17T14:35:07.236Z",
+      "updatedAt": "2026-08-17T14:35:07.236Z",
+      "version": 1
+    },
+    {
+      "id": "msxc5er5o287nerzbe9",
+      "type": "arrow",
+      "x": 440,
+      "y": 720,
+      "strokeColor": "#2f9e44",
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          20
+        ]
+      ],
+      "start": {
+        "id": "synth"
+      },
+      "end": {
+        "id": "why"
+      },
+      "createdAt": "2026-08-17T14:35:07.236Z",
+      "updatedAt": "2026-08-17T14:35:07.236Z",
+      "version": 1
+    },
+    {
+      "id": "msxc5er5kj6c1edcsj",
+      "type": "arrow",
+      "x": 687.9982644538248,
+      "y": 676.1666305094546,
+      "strokeColor": "#2f9e44",
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          64.00347109235031,
+          1.333405647757445
+        ]
+      ],
+      "start": {
+        "id": "synth"
+      },
+      "end": {
+        "id": "claims"
+      },
+      "createdAt": "2026-08-17T14:35:07.236Z",
+      "updatedAt": "2026-08-17T14:35:07.236Z",
+      "version": 1
+    },
+    {
+      "id": "msxc5er5yb097bpdwf8",
+      "type": "arrow",
+      "x": 630.0271002710026,
+      "y": 746.2439024390244,
+      "strokeColor": "#2f9e44",
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          122.16802168021695,
+          -27.48780487804879
+        ]
+      ],
+      "start": {
+        "id": "why"
+      },
+      "end": {
+        "id": "claims"
+      },
+      "createdAt": "2026-08-17T14:35:07.236Z",
+      "updatedAt": "2026-08-17T14:35:07.236Z",
+      "version": 1
+    },
+    {
+      "id": "msxc5er54x49juqpelu",
+      "type": "arrow",
+      "x": 440,
+      "y": 838,
+      "strokeColor": "#c2255c",
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          72
+        ]
+      ],
+      "start": {
+        "id": "why"
+      },
+      "end": {
+        "id": "review"
+      },
+      "createdAt": "2026-08-17T14:35:07.236Z",
+      "updatedAt": "2026-08-17T14:36:44.066Z",
+      "version": 2
+    },
+    {
+      "id": "msxc5er5kytmssb6fp",
+      "type": "arrow",
+      "x": 440,
+      "y": 998,
+      "strokeColor": "#f08c00",
+      "strokeWidth": 2,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          52
+        ]
+      ],
+      "start": {
+        "id": "review"
+      },
+      "end": {
+        "id": "stale"
+      },
+      "createdAt": "2026-08-17T14:35:07.236Z",
+      "updatedAt": "2026-08-17T14:36:44.068Z",
+      "version": 3
+    },
+    {
+      "id": "loop",
+      "type": "arrow",
+      "x": 200,
+      "y": 1090,
+      "width": 90,
+      "height": 419,
+      "strokeColor": "#f08c00",
+      "strokeWidth": 3,
+      "label": {
+        "text": "re-run"
+      },
+      "fontSize": 13,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 2
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -90,
+          0
+        ],
+        [
+          -90,
+          -419
+        ],
+        [
+          0,
+          -419
+        ]
+      ],
+      "createdAt": "2026-08-17T14:35:07.236Z",
+      "updatedAt": "2026-08-17T14:36:44.069Z",
+      "version": 2
+    },
+    {
+      "id": "foot",
+      "type": "text",
+      "x": 140,
+      "y": 1180,
+      "width": 980,
+      "height": 22,
+      "strokeColor": "#495057",
+      "text": "every LLM stage reports its own cost  ·  nothing is written outside claims/ and evidence.db",
+      "fontSize": 14,
+      "fontFamily": 2,
+      "createdAt": "2026-08-17T14:35:07.236Z",
+      "updatedAt": "2026-08-17T14:35:07.236Z",
+      "version": 1
+    },
+    {
+      "id": "note",
+      "type": "text",
+      "x": 706,
+      "y": 1062,
+      "width": 390,
+      "height": 40,
+      "strokeColor": "#868e96",
+      "text": "re-running is manual today — the forward\npipeline (P2) does this per merged PR",
+      "fontSize": 13,
+      "fontFamily": 2,
+      "createdAt": "2026-08-17T14:37:23.754Z",
+      "updatedAt": "2026-08-17T14:37:23.754Z",
+      "version": 1
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff",
+    "gridSize": null
+  }
+}

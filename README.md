@@ -123,6 +123,12 @@ Design intent, decisions, and rationale live in
 
 ## Usage
 
+The pipeline runs in four stages. Each one writes to a durable artifact, so you can stop after
+any of them, inspect what came out, and resume later — nothing is held in memory between
+commands.
+
+![The Archaeon recovery workflow](docs/diagrams/archaeon-workflow.png)
+
 ### Requirements
 
 - Python **3.13+** and [uv](https://docs.astral.sh/uv/)
@@ -292,3 +298,8 @@ The review UI smoke test needs a Playwright browser: `playwright install chromiu
 Specs and plans under `docs/superpowers/` use a fictional `motor-ctrl` component throughout,
 matching [archaeon.example.toml](archaeon.example.toml). Where one cites a validation run performed
 against a private codebase, it is marked *(internal validation run — not in this repo)*.
+
+Both diagrams are committed as editable Excalidraw sources alongside their renders —
+[archaeon-loop.excalidraw](docs/diagrams/archaeon-loop.excalidraw) for the conceptual loop and
+[archaeon-workflow.excalidraw](docs/diagrams/archaeon-workflow.excalidraw) for the command
+pipeline. Edit the source and re-export rather than patching the PNG.
